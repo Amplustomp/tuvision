@@ -22,6 +22,7 @@
     "express": "^4.18.1",
     "path": "^0.12.7",
     "rxjs": "~7.5.0",
+    "serve": "^14.0.1",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
   },
@@ -38,5 +39,8 @@
     "karma-jasmine-html-reporter": "~1.7.0",
     "typescript": "~4.7.2"
   },
-  "engines": { "node": "16.16.0", "npm": "8.11.0" }
+  "engines": {
+    "node": "16.16.0",
+    "npm": "8.11.0"
+  }
 }
