@@ -1,0 +1,37 @@
+<h1><font color="red"><p>Componente 01 Persona!</p></font></h1>
+<h1>Hola Enlazando Objetos</h1>
+
+<h1>run :{{run}}</h1>
+<h1>Nombres :{{nombres}}</h1>
+<h1>Paterno :{{apPaterno}}</h1>
+<h1>Materno :{{apMaterno}}</h1>
+
+
+<br>
+	<label for="nombre">Run</label>
+	<input type="text" name="nombre" id="nombre" placeholder="Escribe tu nombre" value="{{run}}"/>
+<br>
+	<label for="nombre">Nombre</label>
+	<input type="text" name="nombre" id="nombre" placeholder="Escribe tu nombre" value="{{nombres}}"/>
+<br>
+
+	<label for="apellidos">Apellidos</label>
+	<input type="text" name="apellidos" id="apellidos" placeholder="1r Apellido" value="{{apPaterno}} {{apMaterno}}"/>
+<br>
+
+
+<br>
+
+<!-- Método que debe existir en el TS
+     observe que es como si fuera variable
+     Se puede, sin embargo mejor es utilizarlos con paréntesis
+-->
+<h1>{{obtenerNombre}}</h1>
+
+
+<h1><font color="red">Metrodo nombreCompleto</font></h1>
+
+<!-- Método que debe existir en el TS
+     forma correcta de llamar a un método
+-->
+<h1>{{obtenerNombre()}}</h1>
