@@ -1,0 +1,25 @@
+<hr>
+<h1><font color="red"><p>Componente 03  ngFormModule!</p></font></h1>
+
+<!-- desplegamos uno por uno los items del arreglo lPersonas -->
+<ul> Desplegamos los primeros 6 valores del Arreglo con un valor malo a propósito
+  <li>{{lPersonas[0]}}</li>
+  <li>{{lPersonas[1]}}</li>
+  <li>{{lPersonas[2]}}</li>
+  <li>{{lPersonas[3]}}</li>
+  <li><font color="red">************      No Existen, no produce Error</font></li>
+  <li>{{lPersonas[4]}}</li>
+  <li>{{lPersonas[5]}}</li>
+</ul>
+
+<!--Utilizando *nfgFor-->
+<ul>  Desplegamos los Items del arreglo , Utilizando <font color="red">ngFor</font>
+  <!--Por cada elemento del arreglo lPersona ejecuta un li-->
+  <!-- podemos utilizar la variable i como indice-->
+  <li *ngFor="let persona of lPersonas; let i = index">
+      <!-- Por ahora solo es un String -->
+      <!-- Más adelante utilizaremos clases -->
+      {{i+1}} - {{persona}}
+  </li>
+</ul>
+
