@@ -23,3 +23,118 @@
   </li>
 </ul>
 
+<!--Boton para Eliminar la primera Persona-->
+<div *ngIf="lPersonas.length !=0;">
+<button  (click)="borrarPrimerPersona()"> Borrar primer Persona</button>
+</div>
+
+<!--Condición Verdadera o Falsa ngIf-->
+<div  *ngIf="lPersonasEliminados.length !=0 && lPersonas.length !=0">
+    <h1>SIIIIII se han Borrados, El arreglo contiene registros</h1>
+</div>
+
+<!--Condición Verdadera o Falsa ngIf-->
+<div  *ngIf="lPersonasEliminados.length == 0"> <!-- El Arreglo no contiene registros-->
+    <h1>NOOOOO se han Borrados</h1>
+</div>
+
+<!--Condición Verdadera o Falsa ngIf-->
+<div  *ngIf="lPersonas.length ==0"> <!-- Se han eliminado todos los Arreglos-->
+  <h1>:( ya no quedan datos en el arreglo</h1>
+</div>
+
+<!-- Despliegue de los registros eliminados-->
+<!--div  *ngIf="false"-->
+<div  *ngIf="lPersonasEliminados.length !=0">
+    <ul> Registros Eliminados,  <font color="red">Existe el arreglo</font>
+        <li *ngFor="let persona of lPersonasEliminados; let i = index">
+            {{i+1}} - {{persona}}
+        </li>
+    </ul>
+</div>
+
+<!--  **************    Plantillas  Template  **************************** -->
+
+<br>
+<font color="blue" size="10">Plantillas ******************</font>
+
+<!-- Creamos una plantilla llamada plantillaSIIBorrado-->
+<!--Template  plantillaSIIBorrado para el Else-->
+<ng-template #plantillaSIIBorrado>
+    <h1>SIIIIII se han Borrados,Template</h1>
+</ng-template>
+
+<ng-template #plantillaNOBorrado>
+  <h1>NOOOOO se han Borrados, Template</h1>
+</ng-template>
+
+<!-- else del ngIF plantillaSIIBorrado     referencia local -->
+
+<!--Si el Arreglo lPersonasEliminados NO  tiene datos muestra el div -->
+<!--      Si tiene datos muestra plantillaSIIBorrado -->
+<div  *ngIf="lPersonasEliminados.length !=0 ; else plantillaNOBorrado">
+    <div  *ngIf="lPersonas.length ==0; else plantillaSIIBorrado">
+      <h1>:( ya no quedan datos en el arreglo</h1>
+    </div>
+</div>
+
+
+
+
+<!-- ng-Container -->
+
+<div class="container">
+  <!-- por medio de container podemos crear un if then else-->
+  <ng-container *ngIf="booleanA; then caseA; else caseB"></ng-container>
+      <!-- declaramos una plantilla caseA -->
+      <ng-template #caseA>
+          <span>Case A 1</span><br>
+          <span>Case A 2</span><br>
+      </ng-template>
+      <!-- declaramos una plantilla caseB -->
+      <ng-template #caseB>
+          <!-- Despliega si la variable  booleanB es verdadera -->
+          <div *ngIf="booleanB">
+              <span>Case B 3</span><br>
+              <span>Case B 4</span><br>
+              <span>Case B 5</span><br>
+          </div>
+      </ng-template>
+</div>
+
+
+<!-- NgSwitch  1-->
+<h4>ngSwitchCase  </h4>
+<!-- NgFor por Cada Elemento de lPersonasPais-->
+<!-- reisa el pais (country)-->
+<ul *ngFor="let person of lPersonasPais"
+    [ngSwitch]="person.country">
+
+  <!-- si el pais es de UK-->
+  <li *ngSwitchCase="'UK'" class="text-success">
+    {{ person.name }} ({{ person.country }}) UK-AAAA
+  </li>
+
+  <!-- si el pais es de USA-->
+  <li *ngSwitchCase="'USA'" class="text-primary">
+    {{ person.name }} ({{ person.country }}) USAAAAA
+  </li>
+
+  <!-- si el pais es de HK-->
+  <li *ngSwitchCase="'HK'" class="text-danger">
+    {{ person.name }} ({{ person.country }})
+  </li>
+
+  <!-- si el pais No es ninguno de los anteriores -->
+  <li *ngSwitchDefault class="text-warning">
+       {{ person.name }} ({{ person.country }}) DEFECTO
+  </li>
+</ul>
+
+<h4>NgSwitch  222</h4>
+<!-- dependiento de la variable selectedValue [ngSwitch]-->
+<div class='row' [ngSwitch]="selectedValue">
+    <div *ngSwitchCase="'One'">One is Pressed</div>
+    <div *ngSwitchCase="'Two'">Two is Selected</div>
+    <div *ngSwitchDefault>Default Option</div>
+</div>
