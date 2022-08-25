@@ -1,0 +1,34 @@
+<!-- <p>por-moto works!</p> -->
+<h2>Listar Bancos</h2>
+<hr>
+<div class="row">
+    <div class="col">
+
+    </div>
+
+    <ul *ngIf="mostrarSugerencias"
+        class="list-group">
+        <li *ngFor="let banco of bancosSugeridos"
+            class="list-group-item list-group-item-action">
+        </li>
+        <li class="list-group-item list-group-item-action"
+            (click)="buscarSugerido( txBuscar )">
+            <a class="nav-link">
+                Buscar "{{ txBuscar }}"
+            </a>
+        </li>
+    </ul>
+</div>
+
+<hr>
+
+<div class="alert alert-danger"
+     *ngIf="swError">
+    No se encontro data, con {{txBuscar}}
+</div>
+
+<div class="row" *ngIf="!swError">
+    <div class="col">
+        <app-banco-tabla [bancos_entrada]="bancos"></app-banco-tabla>
+    </div>
+</div>

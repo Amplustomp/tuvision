@@ -1,0 +1,32 @@
+<!-- <p>por-moto works!</p> -->
+<h2>Listar Motos</h2>
+<hr>
+<div class="row">
+    <div class="col">
+
+    <ul *ngIf="mostrarSugerencias"
+        class="list-group">
+        <li *ngFor="let moto of motosSugeridos"
+            class="list-group-item list-group-item-action">
+        </li>
+        <li class="list-group-item list-group-item-action"
+            (click)="buscarSugerido( txBuscar )">
+            <a class="nav-link">
+                Buscar "{{ txBuscar }}"
+            </a>
+        </li>
+    </ul>
+</div>
+
+<hr>
+
+<div class="alert alert-danger"
+     *ngIf="swError">
+    No se encontro data, con {{txBuscar}}
+</div>
+
+<div class="row" *ngIf="!swError">
+    <div class="col">
+        <app-moto-tabla [motos_entrada]="motos"></app-moto-tabla>
+    </div>
+</div>

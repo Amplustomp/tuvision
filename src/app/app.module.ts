@@ -2,22 +2,17 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
-import { PersonaDatosComponent } from './persona/persona.component';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { ContadorComponent } from './contador/contador.component';
-import { C03PersonaListarComponent } from './ng-form/ng_form.component';
-
+import { ListarModule } from './listador/listar.module';
+import { AppRoutingListarModule } from './listar.routing';
 
 @NgModule({
   declarations: [
-    AppComponent,
-    PersonaDatosComponent,
-    ContadorComponent,
-    C03PersonaListarComponent
+    AppComponent
   ],
   imports: [
     BrowserModule,
-    BrowserAnimationsModule
+    ListarModule,
+    AppRoutingListarModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,0 +1,26 @@
+<!-- <p>por-pokemon works!</p> -->
+
+<h2>Listar Pokemon</h2>
+<hr>
+<div class="row">
+    <div class="col">
+
+      <app-pokemon-input
+        (onEnter)="buscarEmit( $event )"
+        placeHolderVar="Buscar Pokemon por ID"
+        ></app-pokemon-input>
+    </div>
+</div>
+
+<hr>
+
+<div class="alert alert-danger"
+     *ngIf="swError">
+    No se encontro data, con {{txBuscar}}
+</div>
+
+<div class="row" *ngIf="!swError">
+    <div class="col">
+        <app-pokemon-tabla [pokemon_entrada]="pokemon"></app-pokemon-tabla>
+    </div>
+</div>
