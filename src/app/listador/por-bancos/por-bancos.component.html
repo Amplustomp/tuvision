@@ -3,32 +3,32 @@
 <hr>
 <div class="row">
     <div class="col">
-
-    </div>
-
-    <ul *ngIf="mostrarSugerencias"
-        class="list-group">
-        <li *ngFor="let banco of bancosSugeridos"
-            class="list-group-item list-group-item-action">
-        </li>
-        <li class="list-group-item list-group-item-action"
-            (click)="buscarSugerido( txBuscar )">
-            <a class="nav-link">
-                Buscar "{{ txBuscar }}"
-            </a>
-        </li>
-    </ul>
-</div>
-
-<hr>
-
-<div class="alert alert-danger"
-     *ngIf="swError">
-    No se encontro data, con {{txBuscar}}
-</div>
-
-<div class="row" *ngIf="!swError">
-    <div class="col">
-        <app-banco-tabla [bancos_entrada]="bancos"></app-banco-tabla>
     </div>
 </div>
+
+  <table class="table table-hover">
+      <thead>
+          <tr>
+              <th>#</th>
+              <th scope="col">Nombre</th>
+              <th scope="col">Dirección</th>
+              <th scope="col">Teléfono</th>
+              <th scope="col">Sucursales</th>
+          </tr>
+      </thead>
+      <tbody>
+          <tr *ngFor="let banco of listadoBancos;let i=index">
+             <td>{{i+1}}</td>
+              <td>{{ banco.nombre }}</td>
+              <td>{{ banco.direccion }}</td>
+              <td>{{ banco.telefono }}</td>
+              <td>
+                  <button class="btn btn-primary" (click)="openModalVerSucursales(verSucursales, banco.sucursales)"> Sucursales </button>
+              </td>
+          </tr>
+      </tbody>
+  </table>
+
+<ng-template #verSucursales>
+  <app-modal-sucursales [listadoSucursales]="listadoSucursales"></app-modal-sucursales>
+</ng-template>

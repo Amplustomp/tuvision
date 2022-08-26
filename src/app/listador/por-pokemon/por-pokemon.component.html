@@ -6,7 +6,7 @@
     <div class="col">
 
       <app-pokemon-input
-        (onEnter)="buscarEmit( $event )"
+        (onEnter)="getPokemon( $event )"
         placeHolderVar="Buscar Pokemon por ID"
         ></app-pokemon-input>
     </div>
@@ -14,13 +14,29 @@
 
 <hr>
 
-<div class="alert alert-danger"
-     *ngIf="swError">
-    No se encontro data, con {{txBuscar}}
-</div>
+<table class="table table-hover">
+  <thead>
+  <tr>
+      <th>#</th>
+      <th>Nombre</th>
+      <th>Tipo</th>
+  </tr>
+</thead>
+  <tbody>
+      <!--Taba que permite desplegar el arreglo de paises-->
+      <tr class="animate__animated animate__fadeIn animate__faster">
+          <td>{{ pokemon.id | number: '3.' }} <img src="{{pokemonImg}}" class="small-flag"><img src="{{pokemonImgReverse}}" class="small-flag"></td>
+          <!--Imagen del pais-->
+          <td>{{pokemon.name}}</td>
+          <td>{{pokemonType}}</td>
+      </tr>
+  </tbody>
+</table>
 
-<div class="row" *ngIf="!swError">
-    <div class="col">
-        <app-pokemon-tabla [pokemon_entrada]="pokemon"></app-pokemon-tabla>
-    </div>
-</div>
+<div class="row">
+  <div class="col-md-4 col-md-6">
+      <div class="card">
+          <img [src]="'assets/images/'+ pokemon.id +'.png'" class="card-img-top" [alt]=""/>
+          </div>
+      </div>
+  </div>

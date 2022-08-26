@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { IPokemon } from '../componentes/pokemon.interface';
-import { ListarService } from '../services/listar.service';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { PokemonService } from '../services/pokemon.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-por-pokemon',
@@ -9,56 +9,41 @@ import { ListarService } from '../services/listar.service';
 })
 export class PorPokemonComponent implements OnInit {
 
-  constructor(private servicio:ListarService) { }
+  pokemon: any = '';
+  pokemonImg = '';
+  pokemonImgReverse = '';
+  pokemonType = [];
 
-  ngOnInit(): void {
-  }
+  constructor(private activatedRouter: ActivatedRoute, private pokemonService:PokemonService) {
+
+   }
 
   // Variable que se utilizará para desplegar la palabra seleccionada
   txBuscar:string="sp"
   // Check para indicar si hay error
   swError:boolean=false
   // Si es true se activa el bloque de ayuda en el html
-  mostrarSugerencias: boolean = false;
-  // Arreglo de paises sugeridos
-  pokemonSugeridos   : any[] = [];
-  //  Resultados de Paises
-  pokemon:IPokemon[]=[]
-  // Método que se ejecutará cuando
-  // presionen enter en el componente input
-  buscarEmit(stBuscar:any){
-    console.log("Método Buscar, Por Bancos")
-    // Guardamos lo recibido en nuestra variable local
-    this.txBuscar = stBuscar
-    // Marcamos que no hay error
-    this.swError=false
-    this.servicio.buscarPokemon(this.txBuscar)
-    .subscribe({
-      next: (pokemon) => {  // nextHandler
-         console.log("next",pokemon)
-         this.swError=false
-          // Guardmos la respuesta en el arreglo paises
-          // El cual se desplegará en pantalla
-          this.pokemon=pokemon
-        },
-      complete: () => { console.log("complete") }, // completeHandler
-      error: (error) => { console.log("Error")
-                    console.info(error)
-                    this.swError=true
-                    // Limpiamos el arreglo
-                    this.pokemon=[]
-     },    // errorHandler
-     });
+
+  ngOnInit(): void {
+
   }
-  // Método que se ejecutará cuando se
-  // produsca  onDebounce en el componente input
-  sugerencia(stBuscar:any){
-	console.log("Método Sugerencia Pokemon")
+
+  getPokemon(id: any) {
+    this.pokemonService.getPokemons(id).subscribe({
+      next: res => {
+        this.pokemon = res
+        this.pokemonImg = this.pokemon.sprites.front_default
+        this.pokemonImgReverse = this.pokemon.sprites.back_default
+        this.pokemonType =  res.types.map((tipo: any) => {
+          return tipo.type.name
+       })
+      },
+      error: err => console.log(err),
+      complete: () => console.log('Pokemon obtenido: ', this.pokemon)
+    }
+    )
   }
-  // Método que se ejecutará cuando den click
-  // en una de la lista sugerida
-  buscarSugerido(stBuscar:any){
-  	console.log("Método Buscar Sugerido Pokemon")
-  }
+
+
 
 }

@@ -3,30 +3,31 @@
 <hr>
 <div class="row">
     <div class="col">
-
-    <ul *ngIf="mostrarSugerencias"
-        class="list-group">
-        <li *ngFor="let moto of motosSugeridos"
-            class="list-group-item list-group-item-action">
-        </li>
-        <li class="list-group-item list-group-item-action"
-            (click)="buscarSugerido( txBuscar )">
-            <a class="nav-link">
-                Buscar "{{ txBuscar }}"
-            </a>
-        </li>
-    </ul>
-</div>
-
-<hr>
-
-<div class="alert alert-danger"
-     *ngIf="swError">
-    No se encontro data, con {{txBuscar}}
-</div>
-
-<div class="row" *ngIf="!swError">
-    <div class="col">
-        <app-moto-tabla [motos_entrada]="motos"></app-moto-tabla>
     </div>
 </div>
+
+<table class="table table-hover">
+  <thead>
+  <tr>
+      <th>#</th>
+      <th>Patente</th>
+      <th>Color</th>
+      <th>Número de Chasis</th>
+      <th>Velocidad Máxima</th>
+      <th></th>
+  </tr>
+</thead>
+  <tbody>
+      <!--Taba que permite desplegar el arreglo de paises-->
+      <tr *ngFor="let moto of listadoMotos;let i=index"
+      class="animate__animated animate__fadeIn animate__faster"
+      >
+          <td>{{i+1}}</td>
+          <!--Imagen del pais-->
+          <td>{{moto.patente}} </td>
+          <td [bgColor]=""> {{moto.color}} </td>
+          <td>{{moto.nro_Chasis}}</td>
+          <td>{{moto.max_speed}}</td>
+      </tr>
+  </tbody>
+</table>

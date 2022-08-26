@@ -1,12 +1,16 @@
-export interface IBanco {
-  nombre:        string;
-  direccion:          string;
-  telefono:     string;
-  sucursales:     Surcursal;
+export class Bancos {
+  bancos!:      Banco;
 }
 
-export interface Surcursal {
-  nombre:   string;
-  direccion:   string;
-  telefono: string;
+export class Banco {
+  nombre!:      string;
+  direccion!:   string;
+  telefono!:    string;
+  sucursales?:  Sucursales[];
+}
+
+export class Sucursales {
+  nombre!:      string;
+  direccion!:   string;
+  telefono!:    string;
 }

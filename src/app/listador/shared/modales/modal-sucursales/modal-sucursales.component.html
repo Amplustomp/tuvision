@@ -1,0 +1,27 @@
+<div role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-content">
+
+        <div class="container p-3">
+            <table class="table">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Dirección</th>
+                        <th scope="col">Teléfono</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let sucursal of listadoSucursales">
+                        <td>{{ sucursal.nombre }}</td>
+                        <td>{{ sucursal.direccion }}</td>
+                        <td>{{ sucursal.telefono }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary me-1" (click)="closeModal()"><i class="fas fa-times me-1"></i> Cerrar </button>
+        </div>
+    </div>
+</div>

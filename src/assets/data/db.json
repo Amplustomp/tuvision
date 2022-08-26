@@ -1,0 +1,64 @@
+{
+    "motos": [
+        {
+            "patente": "SK498",
+            "color": "Negro",
+            "nro_Chasis": "124-43-231123",
+            "max_speed": "180"
+        },
+        {
+            "patente": "MV450",
+            "color": "Rojo",
+            "nro_Chasis": "891-12-304598",
+            "max_speed": "100"
+        },
+        {
+            "patente": "SC845",
+            "color": "Negro",
+            "nro_Chasis": "783-56-234978",
+            "max_speed": "250"
+        },
+        {
+            "patente": "RX239",
+            "color": "Azul",
+            "nro_Chasis": "238-27-345879",
+            "max_speed": "180"
+        }
+    ],
+    "bancos": [
+        {
+            "nombre": "Banco de Chile",
+            "direccion": "Av. Providencia 1234",
+            "telefono": "123321123",
+            "sucursales": [
+                {
+                    "nombre": "Providencia",
+                    "direccion": "Av. Providencia 1234",
+                    "telefono": "231289371"
+                },
+                {
+                    "nombre": "Las Condes",
+                    "direccion": "Av. Las Condes 1234",
+                    "telefono": "893457893"
+                }
+            ]
+        },
+        {
+            "nombre": "Banco Santander",
+            "direccion": "Av. Apoquindo 1234",
+            "telefono": "238476237",
+            "sucursales": [
+                {
+                    "nombre": "Maipu",
+                    "direccion": "Av. Pajaritos 1234",
+                    "telefono": "345897345"
+                },
+                {
+                    "nombre": "Cerrillos",
+                    "direccion": "Av. Lo Errazuriz 1234",
+                    "telefono": "435872348"
+                }
+            ]
+        }
+    ]
+}
