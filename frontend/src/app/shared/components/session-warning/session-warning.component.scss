@@ -37,6 +37,14 @@
 .warning-icon {
   color: #f59e0b;
   margin-bottom: 1.5rem;
+
+  &.inactivity-icon {
+    color: #dc2626;
+  }
+}
+
+.session-warning-modal.inactivity {
+  border-top: 4px solid #dc2626;
 }
 
 h2 {

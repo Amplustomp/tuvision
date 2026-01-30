@@ -1,4 +1,4 @@
-import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject, NgZone } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap, catchError, throwError } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
@@ -11,23 +11,30 @@ import { User, LoginResponse, RefreshTokenResponse, TokenInfo } from '../models'
 })
 export class AuthService {
   private readonly API_URL = environment.apiUrl;
+  private readonly INACTIVITY_TIMEOUT = 15 * 60 * 1000; // 15 minutes in milliseconds
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private tokenExpirationTimer: ReturnType<typeof setTimeout> | null = null;
   private sessionWarningTimer: ReturnType<typeof setTimeout> | null = null;
+  private inactivityTimer: ReturnType<typeof setTimeout> | null = null;
   private sessionWarningSubject = new BehaviorSubject<boolean>(false);
+  private inactivityWarningSubject = new BehaviorSubject<boolean>(false);
   private isBrowser: boolean;
+  private activityEvents = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
 
   private http = inject(HttpClient);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private ngZone = inject(NgZone);
 
   currentUser$ = this.currentUserSubject.asObservable();
   sessionWarning$ = this.sessionWarningSubject.asObservable();
+  inactivityWarning$ = this.inactivityWarningSubject.asObservable();
 
   constructor() {
     this.isBrowser = isPlatformBrowser(this.platformId);
     if (this.isBrowser) {
       this.loadStoredUser();
+      this.setupActivityListeners();
     }
   }
 
@@ -148,7 +155,12 @@ export class AuthService {
       clearTimeout(this.sessionWarningTimer);
       this.sessionWarningTimer = null;
     }
+    if (this.inactivityTimer) {
+      clearTimeout(this.inactivityTimer);
+      this.inactivityTimer = null;
+    }
     this.sessionWarningSubject.next(false);
+    this.inactivityWarningSubject.next(false);
   }
 
   private setupTokenExpiration(): void {
@@ -190,10 +202,74 @@ export class AuthService {
     this.sessionWarningSubject.next(false);
   }
 
+  dismissInactivityWarning(): void {
+    this.inactivityWarningSubject.next(false);
+  }
+
   resetActivityTimer(): void {
     if (this.sessionWarningSubject.value) {
       return;
     }
     this.setupTokenExpiration();
+  }
+
+  private setupActivityListeners(): void {
+    const handleActivity = () => {
+      if (this.isAuthenticated()) {
+        this.resetInactivityTimer();
+      }
+    };
+
+    this.ngZone.runOutsideAngular(() => {
+      this.activityEvents.forEach(event => {
+        document.addEventListener(event, handleActivity, { passive: true });
+      });
+    });
+  }
+
+  private resetInactivityTimer(): void {
+    if (this.inactivityTimer) {
+      clearTimeout(this.inactivityTimer);
+    }
+
+    this.inactivityWarningSubject.next(false);
+
+    this.inactivityTimer = setTimeout(() => {
+      this.ngZone.run(() => {
+        if (this.isAuthenticated()) {
+          this.inactivityWarningSubject.next(true);
+          this.startInactivityLogoutCountdown();
+        }
+      });
+    }, this.INACTIVITY_TIMEOUT);
+  }
+
+  private startInactivityLogoutCountdown(): void {
+    setTimeout(() => {
+      this.ngZone.run(() => {
+        if (this.inactivityWarningSubject.value && this.isAuthenticated()) {
+          this.logout();
+        }
+      });
+    }, 60 * 1000);
+  }
+
+  startInactivityTracking(): void {
+    if (this.isBrowser && this.isAuthenticated()) {
+      this.resetInactivityTimer();
+    }
+  }
+
+  stopInactivityTracking(): void {
+    if (this.inactivityTimer) {
+      clearTimeout(this.inactivityTimer);
+      this.inactivityTimer = null;
+    }
+    this.inactivityWarningSubject.next(false);
+  }
+
+  extendSessionFromInactivity(): void {
+    this.inactivityWarningSubject.next(false);
+    this.resetInactivityTimer();
   }
 }

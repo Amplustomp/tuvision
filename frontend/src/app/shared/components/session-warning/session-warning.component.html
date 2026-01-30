@@ -40,3 +40,41 @@
     </div>
   </div>
 }
+
+@if (showInactivityWarning) {
+  <div class="session-warning-overlay">
+    <div class="session-warning-modal inactivity">
+      <div class="warning-icon inactivity-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      </div>
+      
+      <h2>Sesión inactiva</h2>
+      
+      <p class="warning-message">
+        No hemos detectado actividad en los últimos 15 minutos. Su sesión se cerrará automáticamente en 1 minuto.
+      </p>
+      
+      <div class="countdown">
+        <span class="countdown-time">{{ formattedInactivityCountdown }}</span>
+        <span class="countdown-label">segundos restantes</span>
+      </div>
+      
+      <div class="warning-actions">
+        <button 
+          class="btn-refresh" 
+          (click)="extendSession()"
+        >
+          Continuar trabajando
+        </button>
+        
+        <button class="btn-logout" (click)="logout()">
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </div>
+}

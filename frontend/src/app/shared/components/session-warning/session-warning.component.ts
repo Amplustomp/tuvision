@@ -12,10 +12,13 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class SessionWarningComponent implements OnInit, OnDestroy {
   showWarning = false;
+  showInactivityWarning = false;
   isRefreshing = false;
   countdown = 300;
+  inactivityCountdown = 60;
   private subscription = new Subscription();
   private countdownInterval: ReturnType<typeof setInterval> | null = null;
+  private inactivityCountdownInterval: ReturnType<typeof setInterval> | null = null;
   private authService = inject(AuthService);
 
   ngOnInit(): void {
@@ -29,11 +32,23 @@ export class SessionWarningComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    this.subscription.add(
+      this.authService.inactivityWarning$.subscribe(show => {
+        this.showInactivityWarning = show;
+        if (show) {
+          this.startInactivityCountdown();
+        } else {
+          this.stopInactivityCountdown();
+        }
+      })
+    );
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
     this.stopCountdown();
+    this.stopInactivityCountdown();
   }
 
   private startCountdown(): void {
@@ -54,10 +69,32 @@ export class SessionWarningComponent implements OnInit, OnDestroy {
     }
   }
 
+  private startInactivityCountdown(): void {
+    this.inactivityCountdown = 60;
+    this.stopInactivityCountdown();
+    this.inactivityCountdownInterval = setInterval(() => {
+      this.inactivityCountdown--;
+      if (this.inactivityCountdown <= 0) {
+        this.stopInactivityCountdown();
+      }
+    }, 1000);
+  }
+
+  private stopInactivityCountdown(): void {
+    if (this.inactivityCountdownInterval) {
+      clearInterval(this.inactivityCountdownInterval);
+      this.inactivityCountdownInterval = null;
+    }
+  }
+
   get formattedCountdown(): string {
     const minutes = Math.floor(this.countdown / 60);
     const seconds = this.countdown % 60;
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  get formattedInactivityCountdown(): string {
+    return this.inactivityCountdown.toString();
   }
 
   refreshSession(): void {
@@ -71,6 +108,11 @@ export class SessionWarningComponent implements OnInit, OnDestroy {
         this.isRefreshing = false;
       }
     });
+  }
+
+  extendSession(): void {
+    this.authService.extendSessionFromInactivity();
+    this.showInactivityWarning = false;
   }
 
   logout(): void {
