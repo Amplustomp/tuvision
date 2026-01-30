@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://tuvision-production.up.railway.app'
+  apiUrl: '' // Set via API_URL environment variable in Vercel
 };
