@@ -75,7 +75,7 @@ export class AuthService {
       role: role,
     };
 
-    const expiresIn = this.configService.get<string>('JWT_EXPIRES_IN') || '24h';
+    const expiresIn = this.configService.get<string>('JWT_EXPIRES_IN') || '1h';
     const expiresInMs = this.parseExpiresIn(expiresIn);
 
     return {
@@ -91,14 +91,14 @@ export class AuthService {
   }
 
   getTokenExpiresIn(): number {
-    const expiresIn = this.configService.get<string>('JWT_EXPIRES_IN') || '24h';
+    const expiresIn = this.configService.get<string>('JWT_EXPIRES_IN') || '1h';
     return this.parseExpiresIn(expiresIn);
   }
 
   private parseExpiresIn(expiresIn: string): number {
     const match = expiresIn.match(/^(\d+)([smhd])$/);
     if (!match) {
-      return 24 * 60 * 60 * 1000;
+      return 60 * 60 * 1000;
     }
     const value = parseInt(match[1], 10);
     const unit = match[2];
@@ -112,7 +112,7 @@ export class AuthService {
       case 'd':
         return value * 24 * 60 * 60 * 1000;
       default:
-        return 24 * 60 * 60 * 1000;
+        return 60 * 60 * 1000;
     }
   }
 }

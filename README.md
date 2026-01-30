@@ -31,7 +31,7 @@ Editar el archivo `backend/.env` con las siguientes variables:
 MONGODB_URI=mongodb://localhost:27017/tuvision  # o tu URI de MongoDB Atlas/Railway
 PORT=3000
 JWT_SECRET=tu-clave-secreta-cambiar-en-produccion
-JWT_EXPIRES_IN=24h
+JWT_EXPIRES_IN=1h
 ```
 
 ### Generar JWT_SECRET
@@ -228,10 +228,11 @@ Swagger permite:
 - Guards de ruta para protección de acceso
 
 **Gestión de Sesión:**
-- Detección automática de expiración de token
-- Alerta visual 5 minutos antes de expirar
+- Token JWT con expiración de 1 hora
+- Alerta visual 5 minutos antes de expirar el token
 - Contador regresivo con opción de renovar sesión
-- Logout automático por inactividad
+- Logout automático por inactividad (15 minutos sin actividad)
+- Detección de actividad: mouse, teclado, scroll, touch
 
 **Módulo de Usuarios (Solo Admin):**
 - Listado de usuarios con estado activo/inactivo

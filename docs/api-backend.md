@@ -215,8 +215,16 @@ PORT=3000
 
 # JWT
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
-JWT_EXPIRES_IN=24h
+JWT_EXPIRES_IN=1h
 ```
+
+### Configuración de Sesión
+
+El sistema implementa dos mecanismos de seguridad para la gestión de sesiones:
+
+1. **Expiración de Token JWT (1 hora)**: El token JWT expira automáticamente después de 1 hora de actividad. El frontend muestra una advertencia 5 minutos antes de la expiración, permitiendo al usuario renovar su sesión.
+
+2. **Timeout por Inactividad (15 minutos)**: Si el frontend no detecta actividad del usuario (movimiento de mouse, clicks, teclas, scroll, touch) durante 15 minutos, se muestra una advertencia de inactividad. El usuario tiene 1 minuto para confirmar que desea continuar trabajando antes de que la sesión se cierre automáticamente.
 
 ## Códigos de Error
 
