@@ -192,23 +192,115 @@
   margin-left: 70px;
 }
 
-@media (max-width: 768px) {
+.mobile-header {
+  display: none;
+}
+
+.mobile-overlay {
+  display: none;
+}
+
+.app-layout.mobile {
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: #ffffff;
+    padding: 0 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    z-index: 200;
+  }
+
+  .mobile-menu-btn {
+    background: transparent;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    min-width: 44px;
+    min-height: 44px;
+
+    &:hover {
+      background: #f5f5f5;
+    }
+  }
+
+  .mobile-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    span {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #0e903c;
+    }
+  }
+
   .sidebar {
-    width: 70px;
+    position: fixed;
+    left: -280px;
+    top: 0;
+    width: 280px;
+    height: 100vh;
+    transition: left 0.3s ease;
+    z-index: 300;
+
+    &.mobile-open {
+      left: 0;
+    }
+  }
+
+  .mobile-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 250;
+  }
+
+  &.mobile-menu-open .mobile-overlay {
+    display: block;
   }
 
   .main-content {
-    margin-left: 70px;
+    margin-left: 0;
+    margin-top: 56px;
+    padding: 1rem;
   }
+}
 
-  .logo-text,
-  .nav-label,
-  .user-details,
-  .logout-btn span {
-    display: none;
-  }
+@media (max-width: 768px) {
+  .app-layout:not(.mobile) {
+    .sidebar {
+      width: 70px;
+    }
 
-  .user-info {
-    justify-content: center;
+    .main-content {
+      margin-left: 70px;
+    }
+
+    .logo-text,
+    .nav-label,
+    .user-details,
+    .logout-btn span {
+      display: none;
+    }
+
+    .user-info {
+      justify-content: center;
+    }
   }
 }

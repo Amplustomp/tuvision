@@ -1,22 +1,54 @@
-<div class="app-layout" [class.sidebar-collapsed]="isSidebarCollapsed">
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="logo" [class.collapsed]="isSidebarCollapsed">
-        @if (!isSidebarCollapsed) {
-          <img src="assets/images/logo_tuvision.png" alt="Tu Visión" class="logo-image" />
-        } @else {
-          <span class="logo-icon">TV</span>
-        }
-      </div>
-      <button class="toggle-btn" (click)="toggleSidebar()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          @if (isSidebarCollapsed) {
-            <polyline points="9 18 15 12 9 6"></polyline>
-          } @else {
-            <polyline points="15 18 9 12 15 6"></polyline>
-          }
+<div class="app-layout" [class.sidebar-collapsed]="isSidebarCollapsed" [class.mobile]="isMobile" [class.mobile-menu-open]="isMobileMenuOpen">
+  @if (isMobile) {
+    <header class="mobile-header">
+      <button class="mobile-menu-btn" (click)="toggleSidebar()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
         </svg>
       </button>
+      <div class="mobile-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 64 64" fill="none">
+          <path d="M8 28C8 22.477 12.477 18 18 18H22C27.523 18 32 22.477 32 28V32C32 37.523 27.523 42 22 42H18C12.477 42 8 37.523 8 32V28Z" stroke="#0e903c" stroke-width="4" fill="none"/>
+          <path d="M32 28C32 22.477 36.477 18 42 18H46C51.523 18 56 22.477 56 28V32C56 37.523 51.523 42 46 42H42C36.477 42 32 37.523 32 32V28Z" stroke="#0e903c" stroke-width="4" fill="none"/>
+          <path d="M4 30H8" stroke="#0e903c" stroke-width="4" stroke-linecap="round"/>
+          <path d="M56 30H60" stroke="#0e903c" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <span>Tu Visión</span>
+      </div>
+    </header>
+    <div class="mobile-overlay" (click)="closeMobileMenu()" (keydown.escape)="closeMobileMenu()" tabindex="-1" role="button" aria-label="Cerrar menú"></div>
+  }
+  <aside class="sidebar" [class.mobile-open]="isMobileMenuOpen">
+    <div class="sidebar-header">
+      <div class="logo" [class.collapsed]="isSidebarCollapsed">
+        @if (!isMobile && !isSidebarCollapsed) {
+          <img src="assets/images/logo_tuvision.png" alt="Tu Visión" class="logo-image" />
+        } @else if (!isMobile) {
+          <span class="logo-icon">TV</span>
+        } @else {
+          <img src="assets/images/logo_tuvision.png" alt="Tu Visión" class="logo-image" />
+        }
+      </div>
+      @if (!isMobile) {
+        <button class="toggle-btn" (click)="toggleSidebar()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            @if (isSidebarCollapsed) {
+              <polyline points="9 18 15 12 9 6"></polyline>
+            } @else {
+              <polyline points="15 18 9 12 15 6"></polyline>
+            }
+          </svg>
+        </button>
+      } @else {
+        <button class="toggle-btn" (click)="closeMobileMenu()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      }
     </div>
 
     <nav class="sidebar-nav">
