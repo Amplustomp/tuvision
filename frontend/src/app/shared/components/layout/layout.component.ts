@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
+import { Subscription, filter } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../../core/models';
 
@@ -22,6 +22,8 @@ interface NavItem {
 export class LayoutComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   isSidebarCollapsed = false;
+  isMobileMenuOpen = false;
+  isMobile = false;
   private subscription = new Subscription();
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -31,12 +33,34 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'Usuarios', icon: 'users', route: '/admin/users', roles: ['admin'] },
   ];
 
+  @HostListener('window:resize')
+  onResize(): void {
+    this.checkMobile();
+  }
+
   ngOnInit(): void {
+    this.checkMobile();
     this.subscription.add(
       this.authService.currentUser$.subscribe(user => {
         this.currentUser = user;
       })
     );
+    this.subscription.add(
+      this.router.events.pipe(
+        filter(event => event instanceof NavigationEnd)
+      ).subscribe(() => {
+        if (this.isMobile) {
+          this.isMobileMenuOpen = false;
+        }
+      })
+    );
+  }
+
+  private checkMobile(): void {
+    this.isMobile = window.innerWidth <= 768;
+    if (!this.isMobile) {
+      this.isMobileMenuOpen = false;
+    }
   }
 
   ngOnDestroy(): void {
@@ -51,7 +75,15 @@ export class LayoutComponent implements OnInit, OnDestroy {
   }
 
   toggleSidebar(): void {
-    this.isSidebarCollapsed = !this.isSidebarCollapsed;
+    if (this.isMobile) {
+      this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    } else {
+      this.isSidebarCollapsed = !this.isSidebarCollapsed;
+    }
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen = false;
   }
 
   logout(): void {
