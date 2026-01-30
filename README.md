@@ -6,7 +6,7 @@ Portal para gestión de órdenes de trabajo y solicitudes de compra de anteojos 
 
 - Node.js >= 18.0.0
 - npm >= 9.0.0
-- MongoDB (local o Atlas)
+- MongoDB (local o Atlas/Railway)
 
 ## Instalación
 
@@ -28,11 +28,20 @@ cp .env.example .env  # Configurar variables de entorno
 Editar el archivo `backend/.env` con las siguientes variables:
 
 ```env
-MONGODB_URI=mongodb://localhost:27017/tuvision  # o tu URI de MongoDB Atlas
+MONGODB_URI=mongodb://localhost:27017/tuvision  # o tu URI de MongoDB Atlas/Railway
 PORT=3000
 JWT_SECRET=tu-clave-secreta-cambiar-en-produccion
 JWT_EXPIRES_IN=24h
 ```
+
+### Generar JWT_SECRET
+
+Para generar una clave segura para JWT_SECRET:
+```bash
+openssl rand -base64 32
+```
+
+Esta clave debe mantenerse secreta y nunca compartirse. En producción, configúrala como variable de entorno en Railway/Heroku/etc.
 
 ## Desarrollo
 
@@ -62,19 +71,73 @@ cd backend
 npm run build
 ```
 
+## Crear Usuario Administrador Inicial
+
+El sistema requiere un usuario administrador para gestionar otros usuarios. Para crear el primer admin:
+
+### Opción 1: Usando el script de seed
+```bash
+cd backend
+MONGODB_URI="tu-uri-mongodb" ADMIN_PASSWORD="tu-password-seguro" npm run seed:admin
+```
+
+### Opción 2: Insertar directamente en MongoDB
+```javascript
+db.users.insertOne({
+  email: "admin@tuvision.cl",
+  password: "<hash-bcrypt-de-tu-password>",
+  nombre: "Administrador",
+  rut: "00.000.000-0",
+  role: "admin",
+  isActive: true,
+  createdAt: new Date(),
+  updatedAt: new Date()
+})
+```
+
+Para generar el hash bcrypt:
+```bash
+node -e "require('bcrypt').hash('tu-password', 10).then(h => console.log(h))"
+```
+
 ## Estructura del Proyecto
 
 ```
 tuvision/
-├── frontend/    → Angular 17 (SSR habilitado)
-├── backend/     → NestJS + MongoDB
+├── frontend/           → Angular 17 (SSR habilitado)
+├── backend/            → NestJS + MongoDB
 │   ├── src/
-│   │   ├── auth/           → Autenticación JWT
-│   │   ├── users/          → Gestión de usuarios
-│   │   ├── work-orders/    → Órdenes de trabajo
-│   │   └── common/         → Guards, decorators, enums
+│   │   ├── auth/              → Autenticación JWT
+│   │   │   ├── auth.controller.ts
+│   │   │   ├── auth.service.ts
+│   │   │   ├── auth.module.ts
+│   │   │   ├── dto/           → LoginDto
+│   │   │   ├── guards/        → JwtAuthGuard
+│   │   │   └── strategies/    → JwtStrategy
+│   │   ├── users/             → Gestión de usuarios
+│   │   │   ├── users.controller.ts
+│   │   │   ├── users.service.ts
+│   │   │   ├── users.module.ts
+│   │   │   ├── dto/           → CreateUserDto, UpdateUserDto
+│   │   │   └── schemas/       → User schema (Mongoose)
+│   │   ├── work-orders/       → Órdenes de trabajo
+│   │   │   ├── work-orders.controller.ts
+│   │   │   ├── work-orders.service.ts
+│   │   │   ├── work-orders.module.ts
+│   │   │   ├── dto/           → CreateWorkOrderDto, UpdateWorkOrderDto
+│   │   │   └── schemas/       → WorkOrder schema (Mongoose)
+│   │   ├── common/            → Código compartido
+│   │   │   ├── decorators/    → @Roles, @CurrentUser
+│   │   │   ├── guards/        → RolesGuard
+│   │   │   └── enums/         → Role, WorkOrderType, PaymentMethod
+│   │   ├── scripts/           → Scripts utilitarios
+│   │   │   └── seed-admin.ts  → Crear usuario admin inicial
+│   │   ├── app.module.ts
+│   │   └── main.ts            → Configuración Swagger
 │   └── ...
-└── docs/        → Documentación
+└── docs/                → Documentación detallada
+    ├── api-backend.md   → Documentación de la API
+    └── wiki/            → Wiki del proyecto
 ```
 
 ## API Backend
@@ -85,32 +148,108 @@ El backend implementa una API REST con autenticación JWT. Consultar la document
 
 La API incluye documentación interactiva con Swagger UI disponible en:
 - **Local:** http://localhost:3000/api
-- **Producción:** https://tu-dominio.com/api
+- **Producción:** https://tuvision-production.up.railway.app/api
 
-Swagger permite probar todos los endpoints directamente desde el navegador.
+Swagger permite:
+- Explorar todos los endpoints con descripciones detalladas
+- Ver esquemas de request/response con ejemplos
+- Autenticarse con JWT (botón "Authorize")
+- Probar endpoints directamente desde el navegador
 
 ### Endpoints Principales
 
-**Autenticación:**
-- `POST /auth/login` - Iniciar sesión
-- `POST /auth/register` - Registrar usuario (solo admin)
-- `GET /auth/profile` - Obtener perfil
+**Autenticación (`/auth`):**
+| Método | Endpoint | Descripción | Autenticación |
+|--------|----------|-------------|---------------|
+| POST | /auth/login | Iniciar sesión | No |
+| POST | /auth/register | Registrar usuario | Admin |
+| GET | /auth/profile | Obtener perfil | Sí |
 
-**Usuarios (solo admin):**
-- `GET/POST/PATCH/DELETE /users`
+**Usuarios (`/users`) - Solo Admin:**
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | /users | Listar todos los usuarios |
+| GET | /users/:id | Obtener usuario por ID |
+| POST | /users | Crear nuevo usuario |
+| PATCH | /users/:id | Actualizar usuario |
+| DELETE | /users/:id | Eliminar usuario |
 
-**Órdenes de Trabajo:**
-- `GET/POST/PATCH/DELETE /work-orders`
-- `GET /work-orders/by-number/:numero`
-- `GET /work-orders/by-rut?rut=XX`
+**Órdenes de Trabajo (`/work-orders`):**
+| Método | Endpoint | Descripción | Autenticación |
+|--------|----------|-------------|---------------|
+| GET | /work-orders | Listar todas las órdenes | Sí |
+| GET | /work-orders/:id | Obtener orden por ID | Sí |
+| GET | /work-orders/by-number/:numero | Buscar por número de orden | Sí |
+| GET | /work-orders/by-rut?rut=XX | Buscar por RUT del cliente | Sí |
+| POST | /work-orders | Crear nueva orden | Sí |
+| PATCH | /work-orders/:id | Actualizar orden | Sí |
+| DELETE | /work-orders/:id | Eliminar orden | Admin |
 
 ### Roles de Usuario
 
-- **admin**: Gestión completa del sistema
-- **vendedor**: Crear y gestionar órdenes de trabajo
+| Rol | Descripción | Permisos |
+|-----|-------------|----------|
+| **admin** | Administrador del sistema | Gestión completa: usuarios, órdenes, configuración |
+| **vendedor** | Vendedor de la óptica | Crear, ver y actualizar órdenes de trabajo |
 
 ### Tipos de Orden de Trabajo
 
-- **armazon**: Venta directa de armazón
-- **lentes**: Solo lentes (cambio de receta/renovación)
-- **lente_completo**: Armazón + lentes
+| Tipo | Descripción | Requiere Receta |
+|------|-------------|-----------------|
+| **armazon** | Venta directa de armazón | No |
+| **lentes** | Solo lentes (cambio de receta/renovación) | Sí |
+| **lente_completo** | Armazón + lentes | Sí |
+
+### Formas de Pago
+
+- **efectivo**: Pago en efectivo
+- **transferencia**: Transferencia bancaria
+- **tarjeta**: Tarjetas de crédito/débito
+
+## Tecnologías Utilizadas
+
+### Backend
+- **NestJS 11**: Framework Node.js para APIs escalables
+- **MongoDB + Mongoose**: Base de datos NoSQL
+- **Passport + JWT**: Autenticación stateless
+- **bcrypt**: Hash seguro de contraseñas
+- **class-validator**: Validación de DTOs
+- **Swagger/OpenAPI**: Documentación interactiva
+
+### Frontend
+- **Angular 17**: Framework frontend con SSR
+- **TypeScript**: Tipado estático
+
+## Despliegue en Railway
+
+Variables de entorno requeridas:
+```
+MONGODB_URI=mongodb+srv://...
+JWT_SECRET=tu-clave-secreta
+JWT_EXPIRES_IN=24h
+PORT=3000
+```
+
+El backend se despliega automáticamente desde la rama `master`.
+
+## Scripts Disponibles
+
+### Backend
+```bash
+npm run start:dev    # Desarrollo con hot-reload
+npm run start:prod   # Producción
+npm run build        # Compilar TypeScript
+npm run lint         # Verificar código
+npm run seed:admin   # Crear usuario admin (requiere ADMIN_PASSWORD)
+```
+
+### Frontend
+```bash
+npm start            # Desarrollo
+npm run build        # Build de producción
+```
+
+## Documentación Adicional
+
+- [Documentación de la API](docs/api-backend.md)
+- [Wiki del Proyecto](docs/wiki/)
