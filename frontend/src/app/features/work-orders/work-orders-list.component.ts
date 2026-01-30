@@ -131,6 +131,8 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
       filtered = filtered.filter(order => order.tipo === this.filterType);
     }
 
+    filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
     this.filteredWorkOrders = filtered;
   }
 
