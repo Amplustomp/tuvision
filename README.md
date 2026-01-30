@@ -1,27 +1,58 @@
-# Tuvision
+# Tu Visión
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.0.6.
+Portal para gestión de órdenes de pago y solicitudes de compra de anteojos y recetas médicas.
 
-## Development server
+## Estructura del Proyecto
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+```
+tuvision/
+├── frontend/    → Angular 17 (SSR habilitado)
+└── backend/     → NestJS
+```
 
-## Code scaffolding
+## Requisitos
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- Node.js >= 18.0.0
+- npm >= 9.0.0
+
+## Instalación
+
+### Frontend
+```bash
+cd frontend
+npm install
+```
+
+### Backend
+```bash
+cd backend
+npm install
+```
+
+## Desarrollo
+
+### Frontend (http://localhost:4200)
+```bash
+cd frontend
+npm start
+```
+
+### Backend (http://localhost:3000)
+```bash
+cd backend
+npm run start:dev
+```
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+### Frontend
+```bash
+cd frontend
+npm run build
+```
 
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+### Backend
+```bash
+cd backend
+npm run build
+```
