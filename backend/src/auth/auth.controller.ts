@@ -64,4 +64,37 @@ export class AuthController {
   getProfile(@CurrentUser() user: { userId: string }) {
     return this.authService.getProfile(user.userId);
   }
+
+  @Post('refresh')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Refrescar token',
+    description: 'Genera un nuevo token JWT para el usuario autenticado',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refrescado exitosamente',
+  })
+  @ApiResponse({ status: 401, description: 'No autorizado o token expirado' })
+  refreshToken(
+    @CurrentUser() user: { userId: string; email: string; role: string },
+  ) {
+    return this.authService.refreshToken(user.userId, user.email, user.role);
+  }
+
+  @Get('token-info')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Información del token',
+    description: 'Obtiene información sobre la configuración del token',
+  })
+  @ApiResponse({ status: 200, description: 'Información del token' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  getTokenInfo() {
+    return {
+      expires_in: this.authService.getTokenExpiresIn(),
+    };
+  }
 }

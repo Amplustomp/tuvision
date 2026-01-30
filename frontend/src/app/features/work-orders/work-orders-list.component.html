@@ -1,0 +1,509 @@
+<div class="work-orders-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Órdenes de Trabajo</h1>
+      <p>Gestione las órdenes de trabajo de la óptica</p>
+    </div>
+    <button class="btn-primary" (click)="openCreateModal()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      Nueva Orden
+    </button>
+  </div>
+
+  @if (successMessage) {
+    <button type="button" class="alert alert-success" (click)="clearMessages()">
+      {{ successMessage }}
+    </button>
+  }
+
+  @if (errorMessage && !showModal) {
+    <button type="button" class="alert alert-error" (click)="clearMessages()">
+      {{ errorMessage }}
+    </button>
+  }
+
+  <div class="filters-bar">
+    <div class="search-box">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input 
+        type="text" 
+        placeholder="Buscar por nombre, RUT o número de orden..." 
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="applyFilters()"
+      />
+    </div>
+    <select [(ngModel)]="filterType" (ngModelChange)="applyFilters()">
+      <option value="">Todos los tipos</option>
+      @for (type of workOrderTypes; track type.value) {
+        <option [value]="type.value">{{ type.label }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="work-orders-table-container">
+    @if (isLoading && workOrders.length === 0) {
+      <div class="loading-state">
+        <div class="spinner-large"></div>
+        <p>Cargando órdenes...</p>
+      </div>
+    } @else if (filteredWorkOrders.length === 0) {
+      <div class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+        </svg>
+        <h3>No hay órdenes de trabajo</h3>
+        <p>{{ searchTerm || filterType ? 'No se encontraron resultados' : 'Comience creando una nueva orden' }}</p>
+      </div>
+    } @else {
+      <table class="work-orders-table">
+        <thead>
+          <tr>
+            <th>N° Orden</th>
+            <th>Cliente</th>
+            <th>RUT</th>
+            <th>Tipo</th>
+            <th>Total</th>
+            <th>Saldo</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of filteredWorkOrders; track order._id) {
+            <tr>
+              <td>
+                <span class="order-number">#{{ order.numeroOrden }}</span>
+              </td>
+              <td>{{ order.cliente.nombre }}</td>
+              <td>{{ order.cliente.rut }}</td>
+              <td>
+                <span class="type-badge" [attr.data-type]="order.tipo">
+                  {{ getTypeLabel(order.tipo) }}
+                </span>
+              </td>
+              <td>{{ formatCurrency(order.total) }}</td>
+              <td>
+                <span [class.saldo-pendiente]="(order.saldo || 0) > 0">
+                  {{ formatCurrency(order.saldo) }}
+                </span>
+              </td>
+              <td>{{ formatDate(order.createdAt) }}</td>
+              <td>
+                <div class="actions">
+                  <button class="btn-icon" title="Ver detalle" (click)="openDetailModal(order)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                  @if (isAdmin) {
+                    <button class="btn-icon" title="Editar" (click)="openEditModal(order)">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                      </svg>
+                    </button>
+                    <button class="btn-icon btn-danger" title="Eliminar" (click)="confirmDelete(order)">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      </svg>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
+
+@if (showModal) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" (click)="closeModal()" (keydown.escape)="closeModal()">
+    <div class="modal modal-large" role="document" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isEditing ? 'Editar Orden de Trabajo' : 'Nueva Orden de Trabajo' }}</h2>
+        <button class="btn-close" (click)="closeModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        @if (errorMessage) {
+          <div class="alert alert-error">{{ errorMessage }}</div>
+        }
+
+        <div class="form-section">
+          <h3>Tipo de Orden</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tipo">Tipo *</label>
+              <select id="tipo" [(ngModel)]="formData.tipo">
+                @for (type of workOrderTypes; track type.value) {
+                  <option [value]="type.value">{{ type.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Datos del Cliente</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="clienteNombre">Nombre *</label>
+              <input type="text" id="clienteNombre" [(ngModel)]="formData.cliente.nombre" placeholder="Nombre completo" />
+            </div>
+            <div class="form-group">
+              <label for="clienteRut">RUT *</label>
+              <input type="text" id="clienteRut" [(ngModel)]="formData.cliente.rut" placeholder="12.345.678-9" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="clienteTelefono">Teléfono</label>
+              <input type="text" id="clienteTelefono" [(ngModel)]="formData.cliente.telefono" placeholder="+56 9 1234 5678" />
+            </div>
+            <div class="form-group">
+              <label for="clienteEmail">Email</label>
+              <input type="email" id="clienteEmail" [(ngModel)]="formData.cliente.email" placeholder="correo@ejemplo.com" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label for="clienteDireccion">Dirección</label>
+              <input type="text" id="clienteDireccion" [(ngModel)]="formData.cliente.direccion" placeholder="Dirección completa" />
+            </div>
+          </div>
+        </div>
+
+        @if (requiresReceta()) {
+          <div class="form-section">
+            <h3>Receta Médica</h3>
+            <div class="receta-grid">
+              <div class="receta-column">
+                <h4>Ojo Derecho</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="odEsfera">Esfera</label>
+                    <input type="number" id="odEsfera" step="0.25" [(ngModel)]="formData.receta!.ojoDerecho.esfera" />
+                  </div>
+                  <div class="form-group">
+                    <label for="odCilindro">Cilindro</label>
+                    <input type="number" id="odCilindro" step="0.25" [(ngModel)]="formData.receta!.ojoDerecho.cilindro" />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="odEje">Eje</label>
+                    <input type="number" id="odEje" [(ngModel)]="formData.receta!.ojoDerecho.eje" />
+                  </div>
+                  <div class="form-group">
+                    <label for="odAdicion">Adición</label>
+                    <input type="number" id="odAdicion" step="0.25" [(ngModel)]="formData.receta!.ojoDerecho.adicion" />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="odDp">DP</label>
+                    <input type="number" id="odDp" step="0.5" [(ngModel)]="formData.receta!.ojoDerecho.distanciaPupilar" />
+                  </div>
+                </div>
+              </div>
+              <div class="receta-column">
+                <h4>Ojo Izquierdo</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="oiEsfera">Esfera</label>
+                    <input type="number" id="oiEsfera" step="0.25" [(ngModel)]="formData.receta!.ojoIzquierdo.esfera" />
+                  </div>
+                  <div class="form-group">
+                    <label for="oiCilindro">Cilindro</label>
+                    <input type="number" id="oiCilindro" step="0.25" [(ngModel)]="formData.receta!.ojoIzquierdo.cilindro" />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="oiEje">Eje</label>
+                    <input type="number" id="oiEje" [(ngModel)]="formData.receta!.ojoIzquierdo.eje" />
+                  </div>
+                  <div class="form-group">
+                    <label for="oiAdicion">Adición</label>
+                    <input type="number" id="oiAdicion" step="0.25" [(ngModel)]="formData.receta!.ojoIzquierdo.adicion" />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="oiDp">DP</label>
+                    <input type="number" id="oiDp" step="0.5" [(ngModel)]="formData.receta!.ojoIzquierdo.distanciaPupilar" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (formData.tipo === 'armazon' || formData.tipo === 'lente_completo') {
+          <div class="form-section">
+            <h3>Armazón</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="armazonMarca">Marca</label>
+                <input type="text" id="armazonMarca" [(ngModel)]="formData.armazon!.marca" placeholder="Marca del armazón" />
+              </div>
+              <div class="form-group">
+                <label for="armazonModelo">Modelo</label>
+                <input type="text" id="armazonModelo" [(ngModel)]="formData.armazon!.modelo" placeholder="Modelo" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="armazonColor">Color</label>
+                <input type="text" id="armazonColor" [(ngModel)]="formData.armazon!.color" placeholder="Color" />
+              </div>
+              <div class="form-group">
+                <label for="armazonPrecio">Precio</label>
+                <input type="number" id="armazonPrecio" [(ngModel)]="formData.armazon!.precio" placeholder="0" />
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (formData.tipo === 'lentes' || formData.tipo === 'lente_completo') {
+          <div class="form-section">
+            <h3>Lentes</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="lentesTipo">Tipo</label>
+                <input type="text" id="lentesTipo" [(ngModel)]="formData.lentes!.tipo" placeholder="Tipo de lente" />
+              </div>
+              <div class="form-group">
+                <label for="lentesMaterial">Material</label>
+                <input type="text" id="lentesMaterial" [(ngModel)]="formData.lentes!.material" placeholder="Material" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="lentesPrecio">Precio</label>
+                <input type="number" id="lentesPrecio" [(ngModel)]="formData.lentes!.precio" placeholder="0" />
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="form-section">
+          <h3>Pago</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pagoTotal">Total</label>
+              <input type="number" id="pagoTotal" [(ngModel)]="formData.total" placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label for="pagoAbono">Abono</label>
+              <input type="number" id="pagoAbono" [(ngModel)]="formData.abono" placeholder="0" />
+            </div>
+            <div class="form-group">
+              <label for="pagoSaldo">Saldo</label>
+              <input type="number" id="pagoSaldo" [value]="calculateSaldo()" readonly class="readonly" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pagoFormaPago">Forma de Pago</label>
+              <select id="pagoFormaPago" [(ngModel)]="formData.formaPago">
+                @for (method of paymentMethods; track method.value) {
+                  <option [value]="method.value">{{ method.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Observaciones</h3>
+          <div class="form-row">
+            <div class="form-group full-width">
+              <textarea [(ngModel)]="formData.observaciones" rows="3" placeholder="Observaciones adicionales..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeModal()">Cancelar</button>
+        <button class="btn-primary" (click)="saveWorkOrder()" [disabled]="isLoading">
+          @if (isLoading) {
+            <span class="spinner"></span>
+            Guardando...
+          } @else {
+            {{ isEditing ? 'Actualizar' : 'Crear' }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showDetailModal && detailWorkOrder) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" (click)="closeDetailModal()" (keydown.escape)="closeDetailModal()">
+    <div class="modal modal-large" role="document" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Orden de Trabajo #{{ detailWorkOrder.numeroOrden }}</h2>
+        <button class="btn-close" (click)="closeDetailModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body detail-view">
+        <div class="detail-section">
+          <h3>Información General</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="label">Tipo</span>
+              <span class="value">{{ getTypeLabel(detailWorkOrder.tipo) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Fecha</span>
+              <span class="value">{{ formatDate(detailWorkOrder.createdAt) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Estado</span>
+              <span class="value">{{ detailWorkOrder.estado || 'Pendiente' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Cliente</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="label">Nombre</span>
+              <span class="value">{{ detailWorkOrder.cliente.nombre }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">RUT</span>
+              <span class="value">{{ detailWorkOrder.cliente.rut }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Teléfono</span>
+              <span class="value">{{ detailWorkOrder.cliente.telefono || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Email</span>
+              <span class="value">{{ detailWorkOrder.cliente.email || '-' }}</span>
+            </div>
+          </div>
+        </div>
+
+        @if (detailWorkOrder.receta) {
+          <div class="detail-section">
+            <h3>Receta</h3>
+            <div class="receta-detail">
+              <div class="receta-eye">
+                <h4>Ojo Derecho</h4>
+                <div class="receta-values">
+                  <span>ESF: {{ detailWorkOrder.receta.ojoDerecho.esfera ?? '-' }}</span>
+                  <span>CIL: {{ detailWorkOrder.receta.ojoDerecho.cilindro ?? '-' }}</span>
+                  <span>EJE: {{ detailWorkOrder.receta.ojoDerecho.eje ?? '-' }}</span>
+                  <span>ADD: {{ detailWorkOrder.receta.ojoDerecho.adicion ?? '-' }}</span>
+                  <span>DP: {{ detailWorkOrder.receta.ojoDerecho.distanciaPupilar ?? '-' }}</span>
+                </div>
+              </div>
+              <div class="receta-eye">
+                <h4>Ojo Izquierdo</h4>
+                <div class="receta-values">
+                  <span>ESF: {{ detailWorkOrder.receta.ojoIzquierdo.esfera ?? '-' }}</span>
+                  <span>CIL: {{ detailWorkOrder.receta.ojoIzquierdo.cilindro ?? '-' }}</span>
+                  <span>EJE: {{ detailWorkOrder.receta.ojoIzquierdo.eje ?? '-' }}</span>
+                  <span>ADD: {{ detailWorkOrder.receta.ojoIzquierdo.adicion ?? '-' }}</span>
+                  <span>DP: {{ detailWorkOrder.receta.ojoIzquierdo.distanciaPupilar ?? '-' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="detail-section">
+          <h3>Pago</h3>
+          <div class="detail-grid payment-grid">
+            <div class="detail-item">
+              <span class="label">Total</span>
+              <span class="value">{{ formatCurrency(detailWorkOrder.total) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Abono</span>
+              <span class="value">{{ formatCurrency(detailWorkOrder.abono) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Saldo</span>
+              <span class="value" [class.saldo-pendiente]="(detailWorkOrder.saldo || 0) > 0">
+                {{ formatCurrency(detailWorkOrder.saldo) }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Forma de Pago</span>
+              <span class="value">{{ getPaymentLabel(detailWorkOrder.formaPago) }}</span>
+            </div>
+          </div>
+        </div>
+
+        @if (detailWorkOrder.observaciones) {
+          <div class="detail-section">
+            <h3>Observaciones</h3>
+            <p class="observations">{{ detailWorkOrder.observaciones }}</p>
+          </div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeDetailModal()">Cerrar</button>
+        @if (isAdmin) {
+          <button class="btn-primary" (click)="closeDetailModal(); openEditModal(detailWorkOrder)">
+            Editar
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+@if (showDeleteConfirm) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" (click)="cancelDelete()" (keydown.escape)="cancelDelete()">
+    <div class="modal modal-confirm" role="document" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+      <div class="confirm-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+      <h3>Confirmar eliminación</h3>
+      <p>¿Está seguro que desea eliminar la orden <strong>#{{ workOrderToDelete?.numeroOrden }}</strong>?</p>
+      <p class="warning-text">Esta acción no se puede deshacer.</p>
+      <div class="confirm-actions">
+        <button class="btn-secondary" (click)="cancelDelete()">Cancelar</button>
+        <button class="btn-danger" (click)="deleteWorkOrder()" [disabled]="isLoading">
+          @if (isLoading) {
+            <span class="spinner"></span>
+          }
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+}
