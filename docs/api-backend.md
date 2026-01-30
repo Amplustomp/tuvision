@@ -69,6 +69,37 @@ Obtiene el perfil del usuario autenticado.
 
 **Headers:** `Authorization: Bearer <token>`
 
+#### POST /auth/refresh
+Renueva el token JWT antes de que expire.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response:**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_in": 86400000,
+  "user": {
+    "id": "507f1f77bcf86cd799439011",
+    "email": "usuario@ejemplo.com",
+    "nombre": "Juan Pérez",
+    "role": "vendedor"
+  }
+}
+```
+
+#### GET /auth/token-info
+Obtiene información sobre la expiración del token actual.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response:**
+```json
+{
+  "expires_in": 3600000
+}
+```
+
 ## Gestión de Usuarios
 
 Todos los endpoints de usuarios requieren autenticación y rol de administrador.
@@ -105,7 +136,7 @@ Todos los endpoints de usuarios requieren autenticación y rol de administrador.
 | GET | /work-orders/by-number/:numeroOrden | Obtiene orden por número | Autenticado |
 | GET | /work-orders/by-rut?rut=XX | Busca órdenes por RUT del cliente | Autenticado |
 | POST | /work-orders | Crea una nueva orden | Autenticado |
-| PATCH | /work-orders/:id | Actualiza una orden | Autenticado |
+| PATCH | /work-orders/:id | Actualiza una orden | Admin |
 | DELETE | /work-orders/:id | Elimina una orden | Admin |
 
 ### Estructura de Orden de Trabajo

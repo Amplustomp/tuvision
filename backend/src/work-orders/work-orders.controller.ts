@@ -104,13 +104,19 @@ export class WorkOrdersController {
   }
 
   @Patch(':id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
   @ApiOperation({
     summary: 'Actualizar orden',
-    description: 'Actualiza una orden de trabajo',
+    description: 'Actualiza una orden de trabajo (solo administradores)',
   })
   @ApiParam({ name: 'id', description: 'ID de la orden' })
   @ApiResponse({ status: 200, description: 'Orden actualizada' })
   @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({
+    status: 403,
+    description: 'Acceso denegado - Solo administradores',
+  })
   @ApiResponse({ status: 404, description: 'Orden no encontrada' })
   update(
     @Param('id') id: string,

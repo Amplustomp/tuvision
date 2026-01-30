@@ -105,6 +105,27 @@ node -e "require('bcrypt').hash('tu-password', 10).then(h => console.log(h))"
 ```
 tuvision/
 ├── frontend/           → Angular 17 (SSR habilitado)
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── core/              → Servicios y lógica central
+│   │   │   │   ├── guards/        → authGuard, adminGuard, guestGuard
+│   │   │   │   ├── interceptors/  → authInterceptor (JWT)
+│   │   │   │   ├── models/        → User, WorkOrder interfaces
+│   │   │   │   └── services/      → AuthService, UsersService, WorkOrdersService
+│   │   │   ├── features/          → Módulos de funcionalidad
+│   │   │   │   ├── auth/          → Login component
+│   │   │   │   ├── admin/users/   → Gestión de usuarios (solo admin)
+│   │   │   │   └── work-orders/   → Gestión de órdenes de trabajo
+│   │   │   ├── shared/            → Componentes compartidos
+│   │   │   │   └── components/
+│   │   │   │       ├── layout/           → Sidebar y navegación
+│   │   │   │       └── session-warning/  → Alerta de sesión por vencer
+│   │   │   ├── app.component.ts
+│   │   │   ├── app.config.ts      → Providers e interceptors
+│   │   │   └── app.routes.ts      → Configuración de rutas
+│   │   ├── environments/          → Configuración por entorno
+│   │   └── styles.scss            → Estilos globales (#0e903c primario)
+│   └── ...
 ├── backend/            → NestJS + MongoDB
 │   ├── src/
 │   │   ├── auth/              → Autenticación JWT
@@ -174,6 +195,12 @@ Swagger permite:
 | PATCH | /users/:id | Actualizar usuario |
 | DELETE | /users/:id | Eliminar usuario |
 
+**Autenticación (`/auth`) - Token Refresh:**
+| Método | Endpoint | Descripción | Autenticación |
+|--------|----------|-------------|---------------|
+| POST | /auth/refresh | Renovar token JWT | Sí |
+| GET | /auth/token-info | Obtener info de expiración | Sí |
+
 **Órdenes de Trabajo (`/work-orders`):**
 | Método | Endpoint | Descripción | Autenticación |
 |--------|----------|-------------|---------------|
@@ -182,15 +209,50 @@ Swagger permite:
 | GET | /work-orders/by-number/:numero | Buscar por número de orden | Sí |
 | GET | /work-orders/by-rut?rut=XX | Buscar por RUT del cliente | Sí |
 | POST | /work-orders | Crear nueva orden | Sí |
-| PATCH | /work-orders/:id | Actualizar orden | Sí |
+| PATCH | /work-orders/:id | Actualizar orden | Admin |
 | DELETE | /work-orders/:id | Eliminar orden | Admin |
 
 ### Roles de Usuario
 
 | Rol | Descripción | Permisos |
 |-----|-------------|----------|
-| **admin** | Administrador del sistema | Gestión completa: usuarios, órdenes, configuración |
-| **vendedor** | Vendedor de la óptica | Crear, ver y actualizar órdenes de trabajo |
+| **admin** | Administrador del sistema | Gestión completa: usuarios, órdenes (crear, ver, editar, eliminar) |
+| **vendedor** | Vendedor de la óptica | Crear y ver órdenes de trabajo |
+
+### Funcionalidades del Frontend
+
+**Sistema de Autenticación:**
+- Login con validación de formulario
+- Almacenamiento de token JWT en localStorage
+- Interceptor HTTP para inyección automática del token
+- Guards de ruta para protección de acceso
+
+**Gestión de Sesión:**
+- Detección automática de expiración de token
+- Alerta visual 5 minutos antes de expirar
+- Contador regresivo con opción de renovar sesión
+- Logout automático por inactividad
+
+**Módulo de Usuarios (Solo Admin):**
+- Listado de usuarios con estado activo/inactivo
+- Crear nuevos usuarios con validación
+- Editar usuarios existentes
+- Eliminar usuarios con confirmación
+- Cambiar estado activo/inactivo
+
+**Módulo de Órdenes de Trabajo:**
+- Listado con búsqueda por nombre, RUT o número de orden
+- Filtro por tipo de orden (armazón, lentes, lente completo)
+- Crear nuevas órdenes con formulario completo
+- Ver detalle de orden en modal
+- Editar órdenes (solo admin)
+- Eliminar órdenes con confirmación (solo admin)
+
+**Diseño Visual:**
+- Color primario: #0e903c (verde)
+- Contraste con negro y blanco
+- Sidebar de navegación con menú basado en rol
+- Diseño responsive
 
 ### Tipos de Orden de Trabajo
 

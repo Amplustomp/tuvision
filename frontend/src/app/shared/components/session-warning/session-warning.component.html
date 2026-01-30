@@ -1,0 +1,42 @@
+@if (showWarning) {
+  <div class="session-warning-overlay">
+    <div class="session-warning-modal">
+      <div class="warning-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </div>
+      
+      <h2>Su sesión está por expirar</h2>
+      
+      <p class="warning-message">
+        Por seguridad, su sesión se cerrará automáticamente si no hay actividad.
+      </p>
+      
+      <div class="countdown">
+        <span class="countdown-time">{{ formattedCountdown }}</span>
+        <span class="countdown-label">minutos restantes</span>
+      </div>
+      
+      <div class="warning-actions">
+        <button 
+          class="btn-refresh" 
+          (click)="refreshSession()" 
+          [disabled]="isRefreshing"
+        >
+          @if (isRefreshing) {
+            <span class="spinner"></span>
+            Renovando...
+          } @else {
+            Continuar sesión
+          }
+        </button>
+        
+        <button class="btn-logout" (click)="logout()">
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </div>
+}
