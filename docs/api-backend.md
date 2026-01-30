@@ -4,6 +4,20 @@
 
 El backend de Tu Visión está construido con NestJS y utiliza MongoDB como base de datos. Implementa autenticación JWT y gestión de usuarios con roles diferenciados.
 
+## Documentación Swagger
+
+La API incluye documentación interactiva con Swagger UI que permite explorar y probar todos los endpoints directamente desde el navegador.
+
+**URL de acceso:**
+- Local: `http://localhost:3000/api`
+- Producción: `https://tu-dominio.com/api`
+
+Swagger UI proporciona:
+- Descripción detallada de cada endpoint
+- Esquemas de request/response con ejemplos
+- Autenticación JWT integrada (botón "Authorize")
+- Posibilidad de ejecutar requests de prueba
+
 ## Autenticación
 
 El sistema utiliza JSON Web Tokens (JWT) para la autenticación. Los tokens se envían en el header `Authorization` con el formato `Bearer <token>`.
