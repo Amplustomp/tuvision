@@ -18,7 +18,9 @@ import { UsersModule } from '../users/users.module';
         return {
           secret: configService.get<string>('JWT_SECRET') || 'defaultSecret',
           signOptions: {
-            expiresIn: expiresIn as `${number}${'s' | 'm' | 'h' | 'd'}` | number,
+            expiresIn: expiresIn as
+              | `${number}${'s' | 'm' | 'h' | 'd'}`
+              | number,
           },
         };
       },

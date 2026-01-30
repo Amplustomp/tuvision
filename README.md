@@ -81,6 +81,14 @@ tuvision/
 
 El backend implementa una API REST con autenticación JWT. Consultar la documentación completa en [docs/api-backend.md](docs/api-backend.md).
 
+### Documentación Swagger
+
+La API incluye documentación interactiva con Swagger UI disponible en:
+- **Local:** http://localhost:3000/api
+- **Producción:** https://tu-dominio.com/api
+
+Swagger permite probar todos los endpoints directamente desde el navegador.
+
 ### Endpoints Principales
 
 **Autenticación:**
