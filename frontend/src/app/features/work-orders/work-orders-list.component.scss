@@ -608,15 +608,7 @@
   }
 }
 
-.desktop-only {
-  display: table;
-}
-
-.mobile-only {
-  display: none;
-}
-
-.mobile-cards {
+.cards-container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -727,14 +719,6 @@
 
   .search-box {
     min-width: 100%;
-  }
-
-  .desktop-only {
-    display: none;
-  }
-
-  .mobile-only {
-    display: flex;
   }
 
   .work-orders-table-container {
