@@ -1,7 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
-import { PaymentMethod, WorkOrderType } from '../../common/enums';
+import {
+  PaymentMethod,
+  WorkOrderType,
+  OrderNumberType,
+} from '../../common/enums';
 import { User } from '../../users/schemas/user.schema';
+import { Prescription } from '../../prescriptions/schemas/prescription.schema';
 
 export type WorkOrderDocument = HydratedDocument<WorkOrder>;
 
@@ -111,11 +116,17 @@ export class WorkOrder {
   @Prop({ required: true, unique: true })
   numeroOrden: number;
 
+  @Prop({ type: String, enum: OrderNumberType, required: true })
+  tipoNumeroOrden: OrderNumberType;
+
   @Prop({ type: String, enum: WorkOrderType, required: true })
   tipoOrden: WorkOrderType;
 
   @Prop({ type: CustomerDataSchema, required: true })
   cliente: CustomerData;
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Prescription' })
+  recetaId: Prescription;
 
   @Prop({ type: MedicalPrescriptionSchema })
   receta: MedicalPrescription;

@@ -226,6 +226,65 @@ El sistema implementa dos mecanismos de seguridad para la gestión de sesiones:
 
 2. **Timeout por Inactividad (15 minutos)**: Si el frontend no detecta actividad del usuario (movimiento de mouse, clicks, teclas, scroll, touch) durante 15 minutos, se muestra una advertencia de inactividad. El usuario tiene 1 minuto para confirmar que desea continuar trabajando antes de que la sesión se cierre automáticamente.
 
+## Recetas Médicas
+
+### Endpoints
+
+| Método | Endpoint | Descripción | Rol Requerido |
+|--------|----------|-------------|---------------|
+| GET | /prescriptions | Lista todas las recetas (ordenadas por fecha, más reciente primero) | Autenticado |
+| GET | /prescriptions/:id | Obtiene una receta por ID | Autenticado |
+| GET | /prescriptions/by-rut/:rut | Busca recetas por RUT del cliente | Autenticado |
+| GET | /prescriptions/latest/:rut | Obtiene la última receta del cliente | Autenticado |
+| POST | /prescriptions | Crea una nueva receta | Autenticado |
+| PATCH | /prescriptions/:id | Actualiza una receta | Admin |
+| DELETE | /prescriptions/:id | Elimina una receta | Admin |
+
+### Estructura de Receta Médica
+
+```json
+{
+  "clienteRut": "12.345.678-9",
+  "clienteNombre": "Juan Pérez",
+  "fecha": "2026-02-01",
+  "od": {
+    "esfera": "-2.00",
+    "cilindro": "-0.50",
+    "eje": "180",
+    "adicion": "+2.00",
+    "distanciaPupilar": "32"
+  },
+  "oi": {
+    "esfera": "-1.75",
+    "cilindro": "-0.25",
+    "eje": "175",
+    "adicion": "+2.00",
+    "distanciaPupilar": "31"
+  },
+  "detallesLentes": {
+    "cristal": "Policarbonato",
+    "codigo": "PC-001",
+    "color": "Transparente",
+    "armazonMarca": "Ray-Ban RB5154"
+  },
+  "observaciones": "Cliente prefiere lentes fotocromáticos"
+}
+```
+
+### Campos de Receta
+
+Los valores de la receta (esfera, cilindro, eje, adición, distancia pupilar) son strings para soportar números negativos y decimales.
+
+## Tipos de Número de Orden
+
+Las órdenes de trabajo ahora incluyen un campo `tipoNumeroOrden` que indica el origen de la orden:
+
+| Tipo | Descripción |
+|------|-------------|
+| **tu_vision** | Orden de Tu Visión |
+| **opticolors** | Orden de Opticolors |
+| **optiva_vr** | Orden de Optiva VR |
+
 ## Códigos de Error
 
 | Código | Descripción |

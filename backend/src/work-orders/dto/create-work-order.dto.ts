@@ -6,10 +6,15 @@ import {
   IsString,
   ValidateNested,
   IsDateString,
+  IsMongoId,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PaymentMethod, WorkOrderType } from '../../common/enums';
+import {
+  PaymentMethod,
+  WorkOrderType,
+  OrderNumberType,
+} from '../../common/enums';
 
 class EyePrescriptionDto {
   @ApiPropertyOptional({ description: 'Esfera', example: '-2.00' })
@@ -180,6 +185,15 @@ class PurchaseDataDto {
 
 export class CreateWorkOrderDto {
   @ApiProperty({
+    description: 'Tipo de numero de orden',
+    enum: OrderNumberType,
+    example: OrderNumberType.TU_VISION,
+  })
+  @IsEnum(OrderNumberType)
+  @IsNotEmpty()
+  tipoNumeroOrden: OrderNumberType;
+
+  @ApiProperty({
     description: 'Tipo de orden',
     enum: WorkOrderType,
     example: WorkOrderType.LENTE_COMPLETO,
@@ -195,7 +209,15 @@ export class CreateWorkOrderDto {
   cliente: CustomerDataDto;
 
   @ApiPropertyOptional({
-    description: 'Receta médica (opcional para armazón)',
+    description: 'ID de la receta medica asociada',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @IsMongoId()
+  @IsOptional()
+  recetaId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Receta medica (opcional para armazon)',
     type: MedicalPrescriptionDto,
   })
   @ValidateNested()

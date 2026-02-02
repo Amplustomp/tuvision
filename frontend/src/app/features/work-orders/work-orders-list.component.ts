@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { WorkOrdersService } from '../../core/services/work-orders.service';
 import { AuthService } from '../../core/services/auth.service';
-import { WorkOrder, CreateWorkOrderDto, UpdateWorkOrderDto, WorkOrderType, PaymentMethod } from '../../core/models';
+import { PrescriptionsService } from '../../core/services/prescriptions.service';
+import { WorkOrder, CreateWorkOrderDto, UpdateWorkOrderDto, WorkOrderType, PaymentMethod, OrderNumberType, Prescription } from '../../core/models';
 
 @Component({
   selector: 'app-work-orders-list',
@@ -23,6 +24,7 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
 
   searchTerm = '';
   filterType: WorkOrderType | '' = '';
+  filterOrderNumberType: OrderNumberType | '' = '';
 
   showModal = false;
   isEditing = false;
@@ -36,14 +38,23 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
   showDetailModal = false;
   detailWorkOrder: WorkOrder | null = null;
 
+  latestPrescription: Prescription | null = null;
+
   private subscription = new Subscription();
   private workOrdersService = inject(WorkOrdersService);
   private authService = inject(AuthService);
+  private prescriptionsService = inject(PrescriptionsService);
 
   workOrderTypes: { value: WorkOrderType; label: string }[] = [
-    { value: 'armazon', label: 'Armazón' },
+    { value: 'armazon', label: 'Armazon' },
     { value: 'lentes', label: 'Lentes' },
     { value: 'lente_completo', label: 'Lente Completo' }
+  ];
+
+  orderNumberTypes: { value: OrderNumberType; label: string }[] = [
+    { value: 'tu_vision', label: 'Tu Vision' },
+    { value: 'opticolors', label: 'Opticolors' },
+    { value: 'optiva_vr', label: 'Optiva VR' }
   ];
 
   paymentMethods: { value: PaymentMethod; label: string }[] = [
@@ -67,33 +78,28 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
 
   private getEmptyFormData(): CreateWorkOrderDto {
     return {
-      tipo: 'armazon',
+      tipoNumeroOrden: 'tu_vision',
+      tipoOrden: 'armazon',
       cliente: {
         nombre: '',
         rut: '',
-        telefono: '',
-        email: '',
-        direccion: ''
+        telefono: ''
       },
       receta: {
-        ojoDerecho: {},
-        ojoIzquierdo: {}
+        lejos: { od: {}, oi: {} },
+        cerca: { od: {}, oi: {} },
+        add: '',
+        detallesLejos: { dp: '', cristal: '', codigo: '', color: '', armazonMarca: '' },
+        detallesCerca: { dp: '', cristal: '', codigo: '', color: '', armazonMarca: '' }
       },
-      armazon: {
-        marca: '',
-        modelo: '',
-        color: '',
-        precio: 0
+      compra: {
+        totalVenta: 0,
+        abono: 0,
+        saldo: 0,
+        formaPago: 'efectivo',
+        fechaEntrega: ''
       },
-      lentes: {
-        tipo: '',
-        material: '',
-        tratamientos: [],
-        precio: 0
-      },
-      abono: 0,
-      total: 0,
-      formaPago: 'efectivo',
+      fechaVenta: new Date().toISOString().split('T')[0],
       observaciones: ''
     };
   }
@@ -128,7 +134,11 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     }
 
     if (this.filterType) {
-      filtered = filtered.filter(order => order.tipo === this.filterType);
+      filtered = filtered.filter(order => order.tipoOrden === this.filterType);
+    }
+
+    if (this.filterOrderNumberType) {
+      filtered = filtered.filter(order => order.tipoNumeroOrden === this.filterOrderNumberType);
     }
 
     filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -145,23 +155,31 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
 
   openEditModal(order: WorkOrder): void {
     if (!this.isAdmin) {
-      this.errorMessage = 'Solo los administradores pueden editar órdenes';
+      this.errorMessage = 'Solo los administradores pueden editar ordenes';
       return;
     }
     this.isEditing = true;
     this.selectedWorkOrder = order;
     this.formData = {
-      tipo: order.tipo,
+      tipoNumeroOrden: order.tipoNumeroOrden,
+      tipoOrden: order.tipoOrden,
       cliente: { ...order.cliente },
+      recetaId: order.recetaId,
       receta: order.receta ? {
-        ojoDerecho: { ...order.receta.ojoDerecho },
-        ojoIzquierdo: { ...order.receta.ojoIzquierdo }
-      } : { ojoDerecho: {}, ojoIzquierdo: {} },
-      armazon: order.armazon ? { ...order.armazon } : { marca: '', modelo: '', color: '', precio: 0 },
-      lentes: order.lentes ? { ...order.lentes, tratamientos: [...(order.lentes.tratamientos || [])] } : { tipo: '', material: '', tratamientos: [], precio: 0 },
-      abono: order.abono || 0,
-      total: order.total || 0,
-      formaPago: order.formaPago || 'efectivo',
+        lejos: order.receta.lejos ? {
+          od: order.receta.lejos.od ? { ...order.receta.lejos.od } : {},
+          oi: order.receta.lejos.oi ? { ...order.receta.lejos.oi } : {}
+        } : { od: {}, oi: {} },
+        cerca: order.receta.cerca ? {
+          od: order.receta.cerca.od ? { ...order.receta.cerca.od } : {},
+          oi: order.receta.cerca.oi ? { ...order.receta.cerca.oi } : {}
+        } : { od: {}, oi: {} },
+        add: order.receta.add || '',
+        detallesLejos: order.receta.detallesLejos ? { ...order.receta.detallesLejos } : { dp: '', cristal: '', codigo: '', color: '', armazonMarca: '' },
+        detallesCerca: order.receta.detallesCerca ? { ...order.receta.detallesCerca } : { dp: '', cristal: '', codigo: '', color: '', armazonMarca: '' }
+      } : this.getEmptyFormData().receta,
+      compra: { ...order.compra },
+      fechaVenta: order.fechaVenta,
       observaciones: order.observaciones || ''
     };
     this.showModal = true;
@@ -284,12 +302,36 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
   }
 
   requiresReceta(): boolean {
-    return this.formData.tipo === 'lentes' || this.formData.tipo === 'lente_completo';
+    return this.formData.tipoOrden === 'lentes' || this.formData.tipoOrden === 'lente_completo';
   }
 
   calculateSaldo(): number {
-    const total = this.formData.total || 0;
-    const abono = this.formData.abono || 0;
+    const total = this.formData.compra?.totalVenta || 0;
+    const abono = this.formData.compra?.abono || 0;
     return total - abono;
+  }
+
+  getOrderNumberTypeLabel(type: OrderNumberType): string {
+    const found = this.orderNumberTypes.find(t => t.value === type);
+    return found ? found.label : type;
+  }
+
+  loadLatestPrescription(rut: string): void {
+    if (!rut) return;
+    this.prescriptionsService.getLatestByClientRut(rut).subscribe({
+      next: (prescription) => {
+        this.latestPrescription = prescription;
+      },
+      error: () => {
+        this.latestPrescription = null;
+      }
+    });
+  }
+
+  onClientRutChange(): void {
+    const rut = this.formData.cliente?.rut;
+    if (rut && rut.length >= 8) {
+      this.loadLatestPrescription(rut);
+    }
   }
 }

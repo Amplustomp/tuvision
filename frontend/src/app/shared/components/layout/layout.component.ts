@@ -8,8 +8,10 @@ import { User } from '../../../core/models';
 interface NavItem {
   label: string;
   icon: string;
-  route: string;
+  route?: string;
   roles: ('admin' | 'vendedor')[];
+  children?: NavItem[];
+  isExpanded?: boolean;
 }
 
 @Component({
@@ -29,8 +31,19 @@ export class LayoutComponent implements OnInit, OnDestroy {
   private router = inject(Router);
 
   navItems: NavItem[] = [
-    { label: 'Órdenes de Trabajo', icon: 'clipboard', route: '/work-orders', roles: ['admin', 'vendedor'] },
-    { label: 'Usuarios', icon: 'users', route: '/admin/users', roles: ['admin'] },
+    { label: 'Ordenes de Trabajo', icon: 'clipboard', route: '/work-orders', roles: ['admin', 'vendedor'] },
+    { label: 'Recetas Medicas', icon: 'file-text', route: '/prescriptions', roles: ['admin', 'vendedor'] },
+    { 
+      label: 'Administrar', 
+      icon: 'settings', 
+      roles: ['admin'],
+      isExpanded: false,
+      children: [
+        { label: 'Usuarios', icon: 'users', route: '/admin/users', roles: ['admin'] },
+        { label: 'Recetas Medicas', icon: 'file-text', route: '/admin/prescriptions', roles: ['admin'] },
+        { label: 'Ordenes de Trabajo', icon: 'clipboard', route: '/admin/work-orders', roles: ['admin'] },
+      ]
+    },
   ];
 
   @HostListener('window:resize')
@@ -92,5 +105,14 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   isActive(route: string): boolean {
     return this.router.url.startsWith(route);
+  }
+
+  toggleSubmenu(item: NavItem): void {
+    item.isExpanded = !item.isExpanded;
+  }
+
+  hasActiveChild(item: NavItem): boolean {
+    if (!item.children) return false;
+    return item.children.some(child => child.route && this.isActive(child.route));
   }
 }
