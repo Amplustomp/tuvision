@@ -672,22 +672,22 @@
           <div class="prescription-list-section">
             <h4>Recetas existentes del cliente</h4>
             <div class="prescription-list">
-              @for (prescription of clientPrescriptions; track prescription._id) {
-                <button type="button" class="prescription-item" (click)="selectExistingPrescription(prescription)">
-                  <div class="prescription-info">
-                    <span class="prescription-date">{{ formatDate(prescription.createdAt) }}</span>
-                    <span class="prescription-client">{{ prescription.cliente.nombre }}</span>
-                  </div>
-                  <div class="prescription-details">
-                    @if (prescription.lejos) {
-                      <span class="detail-badge">Lejos: OD {{ prescription.lejos.od?.esfera || '-' }} / OI {{ prescription.lejos.oi?.esfera || '-' }}</span>
-                    }
-                    @if (prescription.cerca) {
-                      <span class="detail-badge">Cerca: OD {{ prescription.cerca.od?.esfera || '-' }} / OI {{ prescription.cerca.oi?.esfera || '-' }}</span>
-                    }
-                  </div>
-                </button>
-              }
+                            @for (prescription of clientPrescriptions; track prescription._id) {
+                              <button type="button" class="prescription-item" (click)="selectExistingPrescription(prescription)">
+                                <div class="prescription-info">
+                                  <span class="prescription-date">{{ formatDate(prescription.createdAt) }}</span>
+                                  <span class="prescription-client">{{ prescription.clienteNombre }}</span>
+                                </div>
+                                <div class="prescription-details">
+                                  @if (prescription.ojoDerecho) {
+                                    <span class="detail-badge">OD: {{ prescription.ojoDerecho.esfera || '-' }}</span>
+                                  }
+                                  @if (prescription.ojoIzquierdo) {
+                                    <span class="detail-badge">OI: {{ prescription.ojoIzquierdo.esfera || '-' }}</span>
+                                  }
+                                </div>
+                              </button>
+                            }
             </div>
           </div>
         } @else {
