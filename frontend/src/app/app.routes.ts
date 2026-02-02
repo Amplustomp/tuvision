@@ -17,9 +17,23 @@ export const routes: Routes = [
         loadComponent: () => import('./features/work-orders/work-orders-list.component').then(m => m.WorkOrdersListComponent)
       },
       {
+        path: 'prescriptions',
+        loadComponent: () => import('./features/prescriptions/prescriptions-list.component').then(m => m.PrescriptionsListComponent)
+      },
+      {
         path: 'admin/users',
         canActivate: [adminGuard],
         loadComponent: () => import('./features/admin/users/users-list.component').then(m => m.UsersListComponent)
+      },
+      {
+        path: 'admin/prescriptions',
+        canActivate: [adminGuard],
+        loadComponent: () => import('./features/prescriptions/prescriptions-list.component').then(m => m.PrescriptionsListComponent)
+      },
+      {
+        path: 'admin/work-orders',
+        canActivate: [adminGuard],
+        loadComponent: () => import('./features/work-orders/work-orders-list.component').then(m => m.WorkOrdersListComponent)
       },
       {
         path: '',

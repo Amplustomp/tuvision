@@ -110,11 +110,12 @@ tuvision/
 │   │   │   ├── core/              → Servicios y lógica central
 │   │   │   │   ├── guards/        → authGuard, adminGuard, guestGuard
 │   │   │   │   ├── interceptors/  → authInterceptor (JWT)
-│   │   │   │   ├── models/        → User, WorkOrder interfaces
-│   │   │   │   └── services/      → AuthService, UsersService, WorkOrdersService
+│   │   │   │   ├── models/        → User, WorkOrder, Prescription interfaces
+│   │   │   │   └── services/      → AuthService, UsersService, WorkOrdersService, PrescriptionsService
 │   │   │   ├── features/          → Módulos de funcionalidad
 │   │   │   │   ├── auth/          → Login component
 │   │   │   │   ├── admin/users/   → Gestión de usuarios (solo admin)
+│   │   │   │   ├── prescriptions/ → Gestión de recetas médicas
 │   │   │   │   └── work-orders/   → Gestión de órdenes de trabajo
 │   │   │   ├── shared/            → Componentes compartidos
 │   │   │   │   └── components/
@@ -147,10 +148,16 @@ tuvision/
 │   │   │   ├── work-orders.module.ts
 │   │   │   ├── dto/           → CreateWorkOrderDto, UpdateWorkOrderDto
 │   │   │   └── schemas/       → WorkOrder schema (Mongoose)
+│   │   ├── prescriptions/     → Recetas médicas
+│   │   │   ├── prescriptions.controller.ts
+│   │   │   ├── prescriptions.service.ts
+│   │   │   ├── prescriptions.module.ts
+│   │   │   ├── dto/           → CreatePrescriptionDto, UpdatePrescriptionDto
+│   │   │   └── schemas/       → Prescription schema (Mongoose)
 │   │   ├── common/            → Código compartido
 │   │   │   ├── decorators/    → @Roles, @CurrentUser
 │   │   │   ├── guards/        → RolesGuard
-│   │   │   └── enums/         → Role, WorkOrderType, PaymentMethod
+│   │   │   └── enums/         → Role, WorkOrderType, PaymentMethod, OrderNumberType
 │   │   ├── scripts/           → Scripts utilitarios
 │   │   │   └── seed-admin.ts  → Crear usuario admin inicial
 │   │   ├── app.module.ts
@@ -212,6 +219,17 @@ Swagger permite:
 | PATCH | /work-orders/:id | Actualizar orden | Admin |
 | DELETE | /work-orders/:id | Eliminar orden | Admin |
 
+**Recetas Médicas (`/prescriptions`):**
+| Método | Endpoint | Descripción | Autenticación |
+|--------|----------|-------------|---------------|
+| GET | /prescriptions | Listar todas las recetas | Sí |
+| GET | /prescriptions/:id | Obtener receta por ID | Sí |
+| GET | /prescriptions/by-rut/:rut | Buscar recetas por RUT del cliente | Sí |
+| GET | /prescriptions/latest/:rut | Obtener última receta del cliente | Sí |
+| POST | /prescriptions | Crear nueva receta | Sí |
+| PATCH | /prescriptions/:id | Actualizar receta | Admin |
+| DELETE | /prescriptions/:id | Eliminar receta | Admin |
+
 ### Roles de Usuario
 
 | Rol | Descripción | Permisos |
@@ -244,10 +262,21 @@ Swagger permite:
 **Módulo de Órdenes de Trabajo:**
 - Listado con búsqueda por nombre, RUT o número de orden
 - Filtro por tipo de orden (armazón, lentes, lente completo)
+- Filtro por tipo de número de orden (Tu Visión, Opticolors, Optiva VR)
 - Crear nuevas órdenes con formulario completo
 - Ver detalle de orden en modal
 - Editar órdenes (solo admin)
 - Eliminar órdenes con confirmación (solo admin)
+- Acceso directo a la última receta del cliente
+
+**Módulo de Recetas Médicas:**
+- Listado de recetas ordenado por fecha (más reciente primero)
+- Búsqueda por RUT del cliente
+- Historial de recetas por cliente
+- Crear nuevas recetas con datos de ambos ojos (OD/OI)
+- Valores de receta soportan números negativos y decimales
+- Editar recetas (solo admin)
+- Eliminar recetas con confirmación (solo admin)
 
 **Diseño Visual:**
 - Color primario: #0e903c (verde)

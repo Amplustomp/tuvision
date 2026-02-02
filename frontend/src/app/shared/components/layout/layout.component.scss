@@ -108,6 +108,45 @@
   white-space: nowrap;
 }
 
+.nav-group {
+  margin-bottom: 0.25rem;
+}
+
+.nav-parent {
+  width: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  justify-content: flex-start;
+
+  .nav-arrow {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s;
+  }
+}
+
+.nav-group.expanded .nav-parent .nav-arrow {
+  transform: rotate(180deg);
+}
+
+.nav-submenu {
+  padding-left: 1rem;
+  margin-top: 0.25rem;
+}
+
+.nav-child {
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+
+  .nav-icon {
+    opacity: 0.8;
+  }
+}
+
 .sidebar-footer {
   padding: 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
