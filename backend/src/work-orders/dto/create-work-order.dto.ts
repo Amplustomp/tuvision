@@ -193,6 +193,14 @@ export class CreateWorkOrderDto {
   @IsNotEmpty()
   tipoNumeroOrden: OrderNumberType;
 
+  @ApiPropertyOptional({
+    description: 'Numero de orden manual (con prefijo #)',
+    example: '#12345',
+  })
+  @IsString()
+  @IsOptional()
+  numeroOrdenManual?: string;
+
   @ApiProperty({
     description: 'Tipo de orden',
     enum: WorkOrderType,

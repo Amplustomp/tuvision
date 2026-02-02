@@ -116,6 +116,9 @@ export class WorkOrder {
   @Prop({ required: true, unique: true })
   numeroOrden: number;
 
+  @Prop()
+  numeroOrdenManual: string;
+
   @Prop({ type: String, enum: OrderNumberType, required: true })
   tipoNumeroOrden: OrderNumberType;
 

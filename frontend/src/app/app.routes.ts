@@ -30,16 +30,25 @@ export const routes: Routes = [
         canActivate: [adminGuard],
         loadComponent: () => import('./features/prescriptions/prescriptions-list.component').then(m => m.PrescriptionsListComponent)
       },
-      {
-        path: 'admin/work-orders',
-        canActivate: [adminGuard],
-        loadComponent: () => import('./features/work-orders/work-orders-list.component').then(m => m.WorkOrdersListComponent)
-      },
-      {
-        path: '',
-        redirectTo: 'work-orders',
-        pathMatch: 'full'
-      }
+            {
+              path: 'admin/work-orders',
+              canActivate: [adminGuard],
+              loadComponent: () => import('./features/work-orders/work-orders-list.component').then(m => m.WorkOrdersListComponent)
+            },
+            {
+              path: 'admin/clients',
+              canActivate: [adminGuard],
+              loadComponent: () => import('./features/clients/clients-list.component').then(m => m.ClientsListComponent)
+            },
+            {
+              path: 'clients',
+              loadComponent: () => import('./features/clients/clients-list.component').then(m => m.ClientsListComponent)
+            },
+            {
+              path: '',
+              redirectTo: 'work-orders',
+              pathMatch: 'full'
+            }
     ]
   },
   {

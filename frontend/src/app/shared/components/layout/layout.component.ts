@@ -30,21 +30,23 @@ export class LayoutComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  navItems: NavItem[] = [
-    { label: 'Ordenes de Trabajo', icon: 'clipboard', route: '/work-orders', roles: ['admin', 'vendedor'] },
-    { label: 'Recetas Medicas', icon: 'file-text', route: '/prescriptions', roles: ['admin', 'vendedor'] },
-    { 
-      label: 'Administrar', 
-      icon: 'settings', 
-      roles: ['admin'],
-      isExpanded: false,
-      children: [
-        { label: 'Usuarios', icon: 'users', route: '/admin/users', roles: ['admin'] },
-        { label: 'Recetas Medicas', icon: 'file-text', route: '/admin/prescriptions', roles: ['admin'] },
-        { label: 'Ordenes de Trabajo', icon: 'clipboard', route: '/admin/work-orders', roles: ['admin'] },
-      ]
-    },
-  ];
+    navItems: NavItem[] = [
+      { label: 'Ordenes de Trabajo', icon: 'clipboard', route: '/work-orders', roles: ['admin', 'vendedor'] },
+      { label: 'Recetas Medicas', icon: 'file-text', route: '/prescriptions', roles: ['admin', 'vendedor'] },
+      { label: 'Clientes', icon: 'users', route: '/clients', roles: ['admin', 'vendedor'] },
+      { 
+        label: 'Administrar', 
+        icon: 'settings', 
+        roles: ['admin'],
+        isExpanded: false,
+        children: [
+          { label: 'Usuarios', icon: 'users', route: '/admin/users', roles: ['admin'] },
+          { label: 'Clientes', icon: 'users', route: '/admin/clients', roles: ['admin'] },
+          { label: 'Recetas Medicas', icon: 'file-text', route: '/admin/prescriptions', roles: ['admin'] },
+          { label: 'Ordenes de Trabajo', icon: 'clipboard', route: '/admin/work-orders', roles: ['admin'] },
+        ]
+      },
+    ];
 
   @HostListener('window:resize')
   onResize(): void {
