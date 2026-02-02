@@ -46,6 +46,7 @@ export interface PurchaseData {
 export interface WorkOrder {
   _id: string;
   numeroOrden: number;
+  numeroOrdenManual?: string;
   tipoNumeroOrden: OrderNumberType;
   tipoOrden: WorkOrderType;
   cliente: CustomerData;
@@ -70,6 +71,7 @@ export interface WorkOrder {
 
 export interface CreateWorkOrderDto {
   tipoNumeroOrden: OrderNumberType;
+  numeroOrdenManual?: string;
   tipoOrden: WorkOrderType;
   cliente: CustomerData;
   recetaId?: string;

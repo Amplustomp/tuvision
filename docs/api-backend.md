@@ -226,6 +226,38 @@ El sistema implementa dos mecanismos de seguridad para la gestión de sesiones:
 
 2. **Timeout por Inactividad (15 minutos)**: Si el frontend no detecta actividad del usuario (movimiento de mouse, clicks, teclas, scroll, touch) durante 15 minutos, se muestra una advertencia de inactividad. El usuario tiene 1 minuto para confirmar que desea continuar trabajando antes de que la sesión se cierre automáticamente.
 
+## Clientes
+
+### Endpoints
+
+| Método | Endpoint | Descripción | Rol Requerido |
+|--------|----------|-------------|---------------|
+| GET | /clients | Lista todos los clientes | Autenticado |
+| GET | /clients/:id | Obtiene un cliente por ID | Autenticado |
+| GET | /clients/by-rut/:rut | Busca cliente por RUT | Autenticado |
+| GET | /clients/search?q=XX | Busca clientes por nombre, RUT, teléfono o email | Autenticado |
+| POST | /clients | Crea un nuevo cliente | Autenticado |
+| PATCH | /clients/:id | Actualiza un cliente | Admin |
+| DELETE | /clients/:id | Elimina un cliente | Admin |
+
+### Estructura de Cliente
+
+```json
+{
+  "rut": "12.345.678-9",
+  "nombre": "Juan Pérez",
+  "telefono": "+56912345678",
+  "email": "juan@ejemplo.com"
+}
+```
+
+### Campos de Cliente
+
+- **rut** (requerido): RUT único del cliente
+- **nombre** (requerido): Nombre completo del cliente
+- **telefono** (opcional): Teléfono de contacto
+- **email** (opcional): Correo electrónico
+
 ## Recetas Médicas
 
 ### Endpoints
@@ -284,6 +316,10 @@ Las órdenes de trabajo ahora incluyen un campo `tipoNumeroOrden` que indica el 
 | **tu_vision** | Orden de Tu Visión |
 | **opticolors** | Orden de Opticolors |
 | **optiva_vr** | Orden de Optiva VR |
+
+### Número de Orden Manual
+
+Las órdenes de trabajo pueden tener un número de orden manual opcional (`numeroOrdenManual`). Este campo permite a los vendedores ingresar un número de orden externo con prefijo `#` (ej: `#12345`). Si se proporciona, se muestra en lugar del número de orden autogenerado.
 
 ## Códigos de Error
 

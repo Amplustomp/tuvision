@@ -278,6 +278,21 @@ Swagger permite:
 - Editar recetas (solo admin)
 - Eliminar recetas con confirmación (solo admin)
 
+**Módulo de Clientes:**
+- Listado de clientes con búsqueda por nombre, RUT, teléfono o email
+- Crear nuevos clientes con datos básicos (nombre, RUT, teléfono, email)
+- Editar clientes existentes
+- Eliminar clientes con confirmación (solo admin)
+- Selección de cliente existente al crear orden de trabajo
+- Vinculación automática de recetas con clientes
+
+**Flujo de Orden de Trabajo:**
+- Seleccionar cliente existente o crear nuevo cliente
+- Número de orden manual opcional (prefijo # para órdenes manuales)
+- Botones para ingresar receta lejos (icono binoculares) y cerca (icono lectura)
+- Seleccionar receta existente del cliente o crear nueva
+- Vinculación de recetas con órdenes de trabajo
+
 **Diseño Visual:**
 - Color primario: #0e903c (verde)
 - Contraste con negro y blanco

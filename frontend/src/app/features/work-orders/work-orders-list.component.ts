@@ -5,7 +5,8 @@ import { Subscription } from 'rxjs';
 import { WorkOrdersService } from '../../core/services/work-orders.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PrescriptionsService } from '../../core/services/prescriptions.service';
-import { WorkOrder, CreateWorkOrderDto, UpdateWorkOrderDto, WorkOrderType, PaymentMethod, OrderNumberType, Prescription } from '../../core/models';
+import { ClientsService } from '../../core/services/clients.service';
+import { WorkOrder, CreateWorkOrderDto, UpdateWorkOrderDto, WorkOrderType, PaymentMethod, OrderNumberType, Prescription, Client } from '../../core/models';
 
 @Component({
   selector: 'app-work-orders-list',
@@ -38,12 +39,26 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
   showDetailModal = false;
   detailWorkOrder: WorkOrder | null = null;
 
-  latestPrescription: Prescription | null = null;
+    latestPrescription: Prescription | null = null;
 
-  private subscription = new Subscription();
-  private workOrdersService = inject(WorkOrdersService);
-  private authService = inject(AuthService);
-  private prescriptionsService = inject(PrescriptionsService);
+    clients: Client[] = [];
+    filteredClients: Client[] = [];
+    selectedClient: Client | null = null;
+    clientSearchTerm = '';
+    showClientDropdown = false;
+    isNewClient = false;
+
+    clientPrescriptions: Prescription[] = [];
+    selectedPrescriptionLejos: Prescription | null = null;
+    selectedPrescriptionCerca: Prescription | null = null;
+    showPrescriptionModal = false;
+    prescriptionType: 'lejos' | 'cerca' = 'lejos';
+
+    private subscription = new Subscription();
+    private workOrdersService = inject(WorkOrdersService);
+    private authService = inject(AuthService);
+    private prescriptionsService = inject(PrescriptionsService);
+    private clientsService = inject(ClientsService);
 
   workOrderTypes: { value: WorkOrderType; label: string }[] = [
     { value: 'armazon', label: 'Armazon' },
@@ -63,14 +78,26 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     { value: 'tarjeta', label: 'Tarjeta' }
   ];
 
-  ngOnInit(): void {
-    this.subscription.add(
-      this.authService.currentUser$.subscribe(user => {
-        this.isAdmin = user?.role === 'admin';
-      })
-    );
-    this.loadWorkOrders();
-  }
+    ngOnInit(): void {
+      this.subscription.add(
+        this.authService.currentUser$.subscribe(user => {
+          this.isAdmin = user?.role === 'admin';
+        })
+      );
+      this.loadWorkOrders();
+      this.loadClients();
+    }
+
+    loadClients(): void {
+      this.clientsService.getAll().subscribe({
+        next: (clients) => {
+          this.clients = clients;
+        },
+        error: (error) => {
+          console.error('Error loading clients:', error);
+        }
+      });
+    }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
@@ -332,6 +359,147 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     const rut = this.formData.cliente?.rut;
     if (rut && rut.length >= 8) {
       this.loadLatestPrescription(rut);
+      this.loadClientPrescriptions(rut);
     }
+  }
+
+  searchClients(): void {
+    if (!this.clientSearchTerm || this.clientSearchTerm.length < 2) {
+      this.filteredClients = [];
+      return;
+    }
+    const term = this.clientSearchTerm.toLowerCase();
+    this.filteredClients = this.clients.filter(c =>
+      c.nombre.toLowerCase().includes(term) ||
+      c.rut.toLowerCase().includes(term) ||
+      (c.telefono && c.telefono.includes(term))
+    ).slice(0, 10);
+  }
+
+  selectClient(client: Client): void {
+    this.selectedClient = client;
+    this.formData.cliente = {
+      nombre: client.nombre,
+      rut: client.rut,
+      telefono: client.telefono || ''
+    };
+    this.clientSearchTerm = client.nombre;
+    this.showClientDropdown = false;
+    this.isNewClient = false;
+    this.loadClientPrescriptions(client.rut);
+  }
+
+  clearClientSelection(): void {
+    this.selectedClient = null;
+    this.clientSearchTerm = '';
+    this.formData.cliente = { nombre: '', rut: '', telefono: '' };
+    this.clientPrescriptions = [];
+    this.selectedPrescriptionLejos = null;
+    this.selectedPrescriptionCerca = null;
+  }
+
+  toggleNewClient(): void {
+    this.isNewClient = !this.isNewClient;
+    if (this.isNewClient) {
+      this.selectedClient = null;
+      this.clientSearchTerm = '';
+    }
+  }
+
+  loadClientPrescriptions(rut: string): void {
+    if (!rut) return;
+    this.prescriptionsService.getByClientRut(rut).subscribe({
+      next: (prescriptions) => {
+        this.clientPrescriptions = prescriptions;
+      },
+      error: () => {
+        this.clientPrescriptions = [];
+      }
+    });
+  }
+
+  openPrescriptionModal(type: 'lejos' | 'cerca'): void {
+    this.prescriptionType = type;
+    this.showPrescriptionModal = true;
+  }
+
+  closePrescriptionModal(): void {
+    this.showPrescriptionModal = false;
+  }
+
+  selectExistingPrescription(prescription: Prescription): void {
+    if (this.prescriptionType === 'lejos') {
+      this.selectedPrescriptionLejos = prescription;
+      if (prescription.ojoDerecho || prescription.ojoIzquierdo) {
+        this.formData.receta = this.formData.receta || { lejos: { od: {}, oi: {} }, cerca: { od: {}, oi: {} }, add: '', detallesLejos: { dp: '', cristal: '', codigo: '', color: '', armazonMarca: '' }, detallesCerca: { dp: '', cristal: '', codigo: '', color: '', armazonMarca: '' } };
+        if (prescription.ojoDerecho) {
+          this.formData.receta.lejos = this.formData.receta.lejos || { od: {}, oi: {} };
+          this.formData.receta.lejos.od = {
+            esfera: prescription.ojoDerecho.esfera,
+            cilindro: prescription.ojoDerecho.cilindro,
+            grado: prescription.ojoDerecho.eje
+          };
+        }
+        if (prescription.ojoIzquierdo) {
+          this.formData.receta.lejos = this.formData.receta.lejos || { od: {}, oi: {} };
+          this.formData.receta.lejos.oi = {
+            esfera: prescription.ojoIzquierdo.esfera,
+            cilindro: prescription.ojoIzquierdo.cilindro,
+            grado: prescription.ojoIzquierdo.eje
+          };
+        }
+        if (prescription.detallesLentes) {
+          this.formData.receta.detallesLejos = {
+            dp: prescription.ojoIzquierdo?.distanciaPupilar || '',
+            cristal: prescription.detallesLentes.cristal || '',
+            codigo: prescription.detallesLentes.codigo || '',
+            color: prescription.detallesLentes.color || '',
+            armazonMarca: prescription.detallesLentes.armazonMarca || ''
+          };
+        }
+      }
+    } else {
+      this.selectedPrescriptionCerca = prescription;
+      if (prescription.ojoDerecho || prescription.ojoIzquierdo) {
+        this.formData.receta = this.formData.receta || { lejos: { od: {}, oi: {} }, cerca: { od: {}, oi: {} }, add: '', detallesLejos: { dp: '', cristal: '', codigo: '', color: '', armazonMarca: '' }, detallesCerca: { dp: '', cristal: '', codigo: '', color: '', armazonMarca: '' } };
+        if (prescription.ojoDerecho) {
+          this.formData.receta.cerca = this.formData.receta.cerca || { od: {}, oi: {} };
+          this.formData.receta.cerca.od = {
+            esfera: prescription.ojoDerecho.esfera,
+            cilindro: prescription.ojoDerecho.cilindro,
+            grado: prescription.ojoDerecho.eje
+          };
+        }
+        if (prescription.ojoIzquierdo) {
+          this.formData.receta.cerca = this.formData.receta.cerca || { od: {}, oi: {} };
+          this.formData.receta.cerca.oi = {
+            esfera: prescription.ojoIzquierdo.esfera,
+            cilindro: prescription.ojoIzquierdo.cilindro,
+            grado: prescription.ojoIzquierdo.eje
+          };
+        }
+        if (prescription.detallesLentes) {
+          this.formData.receta.detallesCerca = {
+            dp: prescription.ojoIzquierdo?.distanciaPupilar || '',
+            cristal: prescription.detallesLentes.cristal || '',
+            codigo: prescription.detallesLentes.codigo || '',
+            color: prescription.detallesLentes.color || '',
+            armazonMarca: prescription.detallesLentes.armazonMarca || ''
+          };
+        }
+        if (prescription.ojoDerecho?.adicion) {
+          this.formData.receta.add = prescription.ojoDerecho.adicion;
+        }
+      }
+    }
+    this.formData.recetaId = prescription._id;
+    this.closePrescriptionModal();
+  }
+
+  getDisplayOrderNumber(order: WorkOrder): string {
+    if (order.numeroOrdenManual) {
+      return order.numeroOrdenManual;
+    }
+    return `#${order.numeroOrden}`;
   }
 }

@@ -73,7 +73,7 @@
           <div class="order-card">
             <div class="card-header">
               <div class="order-info">
-                <span class="order-number">#{{ order.numeroOrden }}</span>
+                <span class="order-number">{{ getDisplayOrderNumber(order) }}</span>
                 <span class="type-badge" [attr.data-type]="order.tipoOrden">
                   {{ getTypeLabel(order.tipoOrden) }}
                 </span>
@@ -148,61 +148,142 @@
           <div class="alert alert-error">{{ errorMessage }}</div>
         }
 
-        <div class="form-section">
-          <h3>Tipo de Orden</h3>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="tipoNumeroOrden">Empresa *</label>
-              <select id="tipoNumeroOrden" [(ngModel)]="formData.tipoNumeroOrden">
-                @for (type of orderNumberTypes; track type.value) {
-                  <option [value]="type.value">{{ type.label }}</option>
-                }
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="tipoOrden">Tipo *</label>
-              <select id="tipoOrden" [(ngModel)]="formData.tipoOrden">
-                @for (type of workOrderTypes; track type.value) {
-                  <option [value]="type.value">{{ type.label }}</option>
-                }
-              </select>
-            </div>
-          </div>
-        </div>
+                <div class="form-section">
+                  <h3>Informacion General</h3>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="tipoNumeroOrden">Empresa *</label>
+                      <select id="tipoNumeroOrden" [(ngModel)]="formData.tipoNumeroOrden">
+                        @for (type of orderNumberTypes; track type.value) {
+                          <option [value]="type.value">{{ type.label }}</option>
+                        }
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="tipoOrden">Tipo *</label>
+                      <select id="tipoOrden" [(ngModel)]="formData.tipoOrden">
+                        @for (type of workOrderTypes; track type.value) {
+                          <option [value]="type.value">{{ type.label }}</option>
+                        }
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="numeroOrdenManual">N Orden Manual</label>
+                      <input type="text" id="numeroOrdenManual" [(ngModel)]="formData.numeroOrdenManual" placeholder="#12345" />
+                      <small class="form-hint">Opcional. Prefijo # para ordenes manuales</small>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="fechaVenta">Fecha de Venta *</label>
+                      <input type="date" id="fechaVenta" [(ngModel)]="formData.fechaVenta" />
+                    </div>
+                  </div>
+                </div>
 
-        <div class="form-section">
-          <h3>Datos del Cliente</h3>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="clienteNombre">Nombre *</label>
-              <input type="text" id="clienteNombre" [(ngModel)]="formData.cliente.nombre" placeholder="Nombre completo" />
-            </div>
-            <div class="form-group">
-              <label for="clienteRut">RUT *</label>
-              <input type="text" id="clienteRut" [(ngModel)]="formData.cliente.rut" placeholder="12.345.678-9" (blur)="onClientRutChange()" />
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="clienteTelefono">Telefono</label>
-              <input type="text" id="clienteTelefono" [(ngModel)]="formData.cliente.telefono" placeholder="+56 9 1234 5678" />
-            </div>
-            <div class="form-group">
-              <label for="fechaVenta">Fecha de Venta *</label>
-              <input type="date" id="fechaVenta" [(ngModel)]="formData.fechaVenta" />
-            </div>
-          </div>
-          @if (latestPrescription) {
-            <div class="prescription-info">
-              <p>Ultima receta encontrada para este cliente ({{ formatDate(latestPrescription.createdAt) }})</p>
-            </div>
-          }
-        </div>
+                <div class="form-section">
+                  <h3>Cliente</h3>
+                  <div class="client-selection">
+                    @if (!isNewClient && !selectedClient) {
+                      <div class="form-group client-search-group">
+                        <label for="clientSearch">Buscar Cliente Existente</label>
+                        <div class="search-input-wrapper">
+                          <input 
+                            type="text" 
+                            id="clientSearch" 
+                            [(ngModel)]="clientSearchTerm" 
+                            (input)="searchClients()"
+                            (focus)="showClientDropdown = true"
+                            placeholder="Buscar por nombre, RUT o telefono..." 
+                            autocomplete="off"
+                          />
+                          @if (showClientDropdown && filteredClients.length > 0) {
+                            <div class="client-dropdown">
+                              @for (client of filteredClients; track client._id) {
+                                <button type="button" class="client-option" (click)="selectClient(client)">
+                                  <span class="client-name">{{ client.nombre }}</span>
+                                  <span class="client-rut">{{ client.rut }}</span>
+                                </button>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+                      <div class="client-actions">
+                        <button type="button" class="btn-outline" (click)="toggleNewClient()">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                          </svg>
+                          Nuevo Cliente
+                        </button>
+                      </div>
+                    }
+                    @if (selectedClient) {
+                      <div class="selected-client-card">
+                        <div class="client-info-display">
+                          <span class="client-name">{{ selectedClient.nombre }}</span>
+                          <span class="client-rut">{{ selectedClient.rut }}</span>
+                          @if (selectedClient.telefono) {
+                            <span class="client-phone">{{ selectedClient.telefono }}</span>
+                          }
+                        </div>
+                        <button type="button" class="btn-icon btn-small" (click)="clearClientSelection()" title="Cambiar cliente">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                          </svg>
+                        </button>
+                      </div>
+                    }
+                    @if (isNewClient) {
+                      <div class="new-client-form">
+                        <div class="form-row">
+                          <div class="form-group">
+                            <label for="clienteNombre">Nombre *</label>
+                            <input type="text" id="clienteNombre" [(ngModel)]="formData.cliente.nombre" placeholder="Nombre completo" />
+                          </div>
+                          <div class="form-group">
+                            <label for="clienteRut">RUT *</label>
+                            <input type="text" id="clienteRut" [(ngModel)]="formData.cliente.rut" placeholder="12.345.678-9" (blur)="onClientRutChange()" />
+                          </div>
+                        </div>
+                        <div class="form-row">
+                          <div class="form-group">
+                            <label for="clienteTelefono">Telefono</label>
+                            <input type="text" id="clienteTelefono" [(ngModel)]="formData.cliente.telefono" placeholder="+56 9 1234 5678" />
+                          </div>
+                          <div class="form-group">
+                            <button type="button" class="btn-outline" (click)="toggleNewClient()">Cancelar</button>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
 
-        @if (requiresReceta()) {
-          <div class="form-section">
-            <h3>Receta Medica - Lejos</h3>
-            <div class="receta-grid">
+                @if (requiresReceta()) {
+                  <div class="form-section prescription-section">
+                    <div class="prescription-header">
+                      <h3>Receta Medica - Lejos</h3>
+                      <div class="prescription-actions">
+                        <button type="button" class="btn-prescription" (click)="openPrescriptionModal('lejos')" title="Seleccionar o crear receta lejos">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="10.5" cy="7.5" r="2.5"></circle>
+                            <circle cx="22" cy="7.5" r="2.5"></circle>
+                            <path d="M2 7.5h6"></path>
+                            <path d="M13 7.5h6"></path>
+                            <path d="M5 10v4a2 2 0 0 0 2 2h2"></path>
+                            <path d="M19 10v4a2 2 0 0 1-2 2h-2"></path>
+                          </svg>
+                          Ingresar Receta Lejos
+                        </button>
+                        @if (selectedPrescriptionLejos) {
+                          <span class="prescription-selected">Receta seleccionada</span>
+                        }
+                      </div>
+                    </div>
+                    <div class="receta-grid">
               <div class="receta-column">
                 <h4>Ojo Derecho (OD)</h4>
                 <div class="form-row">
@@ -264,15 +345,32 @@
             </div>
           </div>
 
-          <div class="form-section">
-            <h3>Receta Medica - Cerca</h3>
-            <div class="receta-grid">
-              <div class="receta-column">
-                <h4>Ojo Derecho (OD)</h4>
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="cercaOdEsfera">Esfera</label>
-                    <input type="text" id="cercaOdEsfera" [(ngModel)]="formData.receta!.cerca!.od!.esfera" placeholder="-2.00" />
+                    <div class="form-section prescription-section">
+                      <div class="prescription-header">
+                        <h3>Receta Medica - Cerca</h3>
+                        <div class="prescription-actions">
+                          <button type="button" class="btn-prescription" (click)="openPrescriptionModal('cerca')" title="Seleccionar o crear receta cerca">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                              <circle cx="12" cy="12" r="3"></circle>
+                              <path d="M6 19l-2 2"></path>
+                              <path d="M18 19l2 2"></path>
+                              <rect x="6" y="16" width="12" height="6" rx="1"></rect>
+                            </svg>
+                            Ingresar Receta Cerca
+                          </button>
+                          @if (selectedPrescriptionCerca) {
+                            <span class="prescription-selected">Receta seleccionada</span>
+                          }
+                        </div>
+                      </div>
+                      <div class="receta-grid">
+                        <div class="receta-column">
+                          <h4>Ojo Derecho (OD)</h4>
+                          <div class="form-row">
+                            <div class="form-group">
+                              <label for="cercaOdEsfera">Esfera</label>
+                              <input type="text" id="cercaOdEsfera" [(ngModel)]="formData.receta!.cerca!.od!.esfera" placeholder="-2.00" />
                   </div>
                   <div class="form-group">
                     <label for="cercaOdCilindro">Cilindro</label>
@@ -552,6 +650,55 @@
             Editar
           </button>
         }
+      </div>
+    </div>
+  </div>
+}
+
+@if (showPrescriptionModal) {
+  <div class="modal-overlay" role="dialog" aria-modal="true" (click)="closePrescriptionModal()" (keydown.escape)="closePrescriptionModal()">
+    <div class="modal modal-prescription" role="document" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ prescriptionType === 'lejos' ? 'Receta Lejos' : 'Receta Cerca' }}</h3>
+        <button type="button" class="btn-close" (click)="closePrescriptionModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        @if (clientPrescriptions.length > 0) {
+          <div class="prescription-list-section">
+            <h4>Recetas existentes del cliente</h4>
+            <div class="prescription-list">
+                            @for (prescription of clientPrescriptions; track prescription._id) {
+                              <button type="button" class="prescription-item" (click)="selectExistingPrescription(prescription)">
+                                <div class="prescription-info">
+                                  <span class="prescription-date">{{ formatDate(prescription.createdAt) }}</span>
+                                  <span class="prescription-client">{{ prescription.clienteNombre }}</span>
+                                </div>
+                                <div class="prescription-details">
+                                  @if (prescription.ojoDerecho) {
+                                    <span class="detail-badge">OD: {{ prescription.ojoDerecho.esfera || '-' }}</span>
+                                  }
+                                  @if (prescription.ojoIzquierdo) {
+                                    <span class="detail-badge">OI: {{ prescription.ojoIzquierdo.esfera || '-' }}</span>
+                                  }
+                                </div>
+                              </button>
+                            }
+            </div>
+          </div>
+        } @else {
+          <div class="no-prescriptions">
+            <p>No hay recetas existentes para este cliente.</p>
+          </div>
+        }
+        <div class="prescription-actions-section">
+          <p>O puede ingresar los datos de la receta manualmente en el formulario.</p>
+          <button type="button" class="btn-primary" (click)="closePrescriptionModal()">Ingresar manualmente</button>
+        </div>
       </div>
     </div>
   </div>
