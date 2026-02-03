@@ -44,7 +44,10 @@ export class ClientsController {
     status: 409,
     description: 'Ya existe un cliente con este RUT',
   })
-  create(@Body() createClientDto: CreateClientDto, @CurrentUser() user: AuthenticatedUser) {
+  create(
+    @Body() createClientDto: CreateClientDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     return this.clientsService.create(createClientDto, user);
   }
 

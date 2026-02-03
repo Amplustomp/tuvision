@@ -85,8 +85,8 @@
             </div>
             <div class="card-body">
               <div class="client-info">
-                <span class="client-name">{{ order.cliente.nombre }}</span>
-                <span class="client-rut">{{ order.cliente.rut }}</span>
+                <span class="client-name">{{ getClientName(order) }}</span>
+                <span class="client-rut">{{ getClientRut(order) }}</span>
               </div>
               <div class="payment-info">
                 <div class="payment-row">
@@ -241,21 +241,21 @@
                         <div class="form-row">
                           <div class="form-group">
                             <label for="clienteNombre">Nombre *</label>
-                            <input type="text" id="clienteNombre" [(ngModel)]="formData.cliente.nombre" placeholder="Nombre completo" />
+                            <input type="text" id="clienteNombre" [(ngModel)]="clienteFormData.nombre" placeholder="Nombre completo" />
                           </div>
                           <div class="form-group">
                             <label for="clienteRut">RUT *</label>
-                            <input type="text" id="clienteRut" [(ngModel)]="formData.cliente.rut" placeholder="12.345.678-9" (blur)="onClientRutChange()" />
+                            <input type="text" id="clienteRut" [(ngModel)]="clienteFormData.rut" placeholder="12.345.678-9" (blur)="onClientRutChange()" />
                           </div>
                         </div>
                         <div class="form-row">
                           <div class="form-group">
                             <label for="clienteTelefono">Telefono</label>
-                            <input type="text" id="clienteTelefono" [(ngModel)]="formData.cliente.telefono" placeholder="+56 9 1234 5678" />
+                            <input type="text" id="clienteTelefono" [(ngModel)]="clienteFormData.telefono" placeholder="+56 9 1234 5678" />
                           </div>
                           <div class="form-group">
                             <label for="clienteEmail">Email</label>
-                            <input type="email" id="clienteEmail" [(ngModel)]="formData.cliente.email" placeholder="cliente@ejemplo.com" />
+                            <input type="email" id="clienteEmail" [(ngModel)]="clienteFormData.email" placeholder="cliente@ejemplo.com" />
                           </div>
                         </div>
                         <div class="form-row client-form-actions">
@@ -404,15 +404,15 @@
           <div class="detail-grid">
             <div class="detail-item">
               <span class="label">Nombre</span>
-              <span class="value">{{ detailWorkOrder.cliente.nombre }}</span>
+              <span class="value">{{ getClientName(detailWorkOrder) }}</span>
             </div>
             <div class="detail-item">
               <span class="label">RUT</span>
-              <span class="value">{{ detailWorkOrder.cliente.rut }}</span>
+              <span class="value">{{ getClientRut(detailWorkOrder) }}</span>
             </div>
             <div class="detail-item">
               <span class="label">Telefono</span>
-              <span class="value">{{ detailWorkOrder.cliente.telefono || '-' }}</span>
+              <span class="value">{{ getClientPhone(detailWorkOrder) }}</span>
             </div>
           </div>
         </div>

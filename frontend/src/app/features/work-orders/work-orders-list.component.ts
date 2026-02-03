@@ -124,15 +124,18 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
+  clienteFormData = {
+    nombre: '',
+    rut: '',
+    telefono: '',
+    email: ''
+  };
+
   private getEmptyFormData(): CreateWorkOrderDto {
     return {
       tipoNumeroOrden: 'tu_vision',
       tipoOrden: 'armazon',
-      cliente: {
-        nombre: '',
-        rut: '',
-        telefono: ''
-      },
+      clienteId: '',
       receta: {
         lejos: { od: {}, oi: {} },
         cerca: { od: {}, oi: {} },
@@ -174,11 +177,12 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
 
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(order =>
-        order.cliente.nombre.toLowerCase().includes(term) ||
-        order.cliente.rut.toLowerCase().includes(term) ||
-        order.numeroOrden.toString().includes(term)
-      );
+      filtered = filtered.filter(order => {
+        const cliente = typeof order.clienteId === 'object' ? order.clienteId : null;
+        return (cliente?.nombre?.toLowerCase().includes(term) ||
+          cliente?.rut?.toLowerCase().includes(term) ||
+          order.numeroOrden.toString().includes(term));
+      });
     }
 
     if (this.filterType) {
@@ -208,11 +212,23 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     }
     this.isEditing = true;
     this.selectedWorkOrder = order;
+    const cliente = typeof order.clienteId === 'object' ? order.clienteId : null;
+    this.clienteFormData = {
+      nombre: cliente?.nombre || '',
+      rut: cliente?.rut || '',
+      telefono: cliente?.telefono || '',
+      email: cliente?.email || ''
+    };
+    if (cliente) {
+      this.selectedClient = cliente;
+      this.clientSearchTerm = cliente.nombre;
+    }
     this.formData = {
       tipoNumeroOrden: order.tipoNumeroOrden,
       tipoOrden: order.tipoOrden,
-      cliente: { ...order.cliente },
-      recetaId: order.recetaId,
+      clienteId: typeof order.clienteId === 'string' ? order.clienteId : order.clienteId._id,
+      recetaLejosId: typeof order.recetaLejosId === 'string' ? order.recetaLejosId : order.recetaLejosId?._id,
+      recetaCercaId: typeof order.recetaCercaId === 'string' ? order.recetaCercaId : order.recetaCercaId?._id,
       receta: order.receta ? {
         lejos: order.receta.lejos ? {
           od: order.receta.lejos.od ? { ...order.receta.lejos.od } : {},
@@ -253,8 +269,13 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
     this.successMessage = '';
 
-    if (!this.formData.cliente.nombre || !this.formData.cliente.rut) {
+    if (!this.clienteFormData.nombre || !this.clienteFormData.rut) {
       this.errorMessage = 'El nombre y RUT del cliente son requeridos';
+      return;
+    }
+
+    if (!this.formData.clienteId && !this.isNewClient) {
+      this.errorMessage = 'Debe seleccionar un cliente existente o crear uno nuevo';
       return;
     }
 
@@ -276,17 +297,32 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     } else {
       if (this.isNewClient) {
         const clientData: CreateClientDto = {
-          nombre: this.formData.cliente.nombre,
-          rut: this.formData.cliente.rut,
-          telefono: this.formData.cliente.telefono
+          nombre: this.clienteFormData.nombre,
+          rut: this.clienteFormData.rut,
+          telefono: this.clienteFormData.telefono
         };
         this.clientsService.create(clientData).subscribe({
-          next: () => {
+          next: (savedClient) => {
+            this.formData.clienteId = savedClient._id;
             this.createWorkOrderAfterClient();
           },
           error: (error) => {
             if (error.status === 409) {
-              this.createWorkOrderAfterClient();
+              this.clientsService.getByRut(this.clienteFormData.rut).subscribe({
+                next: (existingClient) => {
+                  if (existingClient) {
+                    this.formData.clienteId = existingClient._id;
+                    this.createWorkOrderAfterClient();
+                  } else {
+                    this.isLoading = false;
+                    this.errorMessage = 'Error al obtener cliente existente';
+                  }
+                },
+                error: () => {
+                  this.isLoading = false;
+                  this.errorMessage = 'Error al obtener cliente existente';
+                }
+              });
             } else {
               this.isLoading = false;
               this.errorMessage = error.error?.message || 'Error al crear cliente';
@@ -403,7 +439,7 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
   }
 
   onClientRutChange(): void {
-    const rut = this.formData.cliente?.rut;
+    const rut = this.clienteFormData.rut;
     if (rut && rut.length >= 8) {
       this.loadLatestPrescription(rut);
       this.loadClientPrescriptions(rut);
@@ -425,10 +461,12 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
 
   selectClient(client: Client): void {
     this.selectedClient = client;
-    this.formData.cliente = {
+    this.formData.clienteId = client._id;
+    this.clienteFormData = {
       nombre: client.nombre,
       rut: client.rut,
-      telefono: client.telefono || ''
+      telefono: client.telefono || '',
+      email: client.email || ''
     };
     this.clientSearchTerm = client.nombre;
     this.showClientDropdown = false;
@@ -439,7 +477,8 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
   clearClientSelection(): void {
     this.selectedClient = null;
     this.clientSearchTerm = '';
-    this.formData.cliente = { nombre: '', rut: '', telefono: '' };
+    this.formData.clienteId = '';
+    this.clienteFormData = { nombre: '', rut: '', telefono: '', email: '' };
     this.clientPrescriptions = [];
     this.selectedPrescriptionLejos = null;
     this.selectedPrescriptionCerca = null;
@@ -456,7 +495,7 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
   }
 
   saveNewClient(): void {
-    if (!this.formData.cliente.nombre || !this.formData.cliente.rut) {
+    if (!this.clienteFormData.nombre || !this.clienteFormData.rut) {
       this.clientSaveError = 'Nombre y RUT son obligatorios';
       return;
     }
@@ -466,10 +505,10 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     this.clientSaveError = '';
 
     const clientData = {
-      nombre: this.formData.cliente.nombre,
-      rut: this.formData.cliente.rut,
-      telefono: this.formData.cliente.telefono || '',
-      email: this.formData.cliente.email || ''
+      nombre: this.clienteFormData.nombre,
+      rut: this.clienteFormData.rut,
+      telefono: this.clienteFormData.telefono || '',
+      email: this.clienteFormData.email || ''
     };
 
     this.clientsService.create(clientData).subscribe({
@@ -477,6 +516,7 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
         this.savingClient = false;
         this.clientSaveMessage = 'Cliente guardado exitosamente';
         this.selectedClient = savedClient;
+        this.formData.clienteId = savedClient._id;
         this.isNewClient = false;
         this.loadClients();
         this.loadClientPrescriptions(savedClient.rut);
@@ -510,7 +550,7 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
   }
 
   savePrescriptionFromForm(type: 'lejos' | 'cerca'): void {
-    if (!this.formData.cliente.rut || !this.formData.cliente.nombre) {
+    if (!this.clienteFormData.rut || !this.clienteFormData.nombre) {
       this.errorMessage = 'Debe ingresar los datos del cliente primero';
       return;
     }
@@ -524,42 +564,38 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     }
 
     const prescriptionData: CreatePrescriptionDto = {
-      clienteRut: this.formData.cliente.rut,
-      clienteNombre: this.formData.cliente.nombre,
-      clienteTelefono: this.formData.cliente.telefono,
+      clienteRut: this.clienteFormData.rut,
+      clienteNombre: this.clienteFormData.nombre,
+      clienteTelefono: this.clienteFormData.telefono,
+      tipo: type,
       ojoDerecho: recetaData?.od ? {
         esfera: recetaData.od.esfera,
         cilindro: recetaData.od.cilindro,
-        eje: recetaData.od.grado,
-        distanciaPupilar: detalles?.dp
+        eje: recetaData.od.grado
       } : undefined,
       ojoIzquierdo: recetaData?.oi ? {
         esfera: recetaData.oi.esfera,
         cilindro: recetaData.oi.cilindro,
-        eje: recetaData.oi.grado,
-        distanciaPupilar: detalles?.dp
+        eje: recetaData.oi.grado
       } : undefined,
-      detallesLentes: detalles ? {
-        cristal: detalles.cristal,
-        codigo: detalles.codigo,
-        color: detalles.color,
-        armazonMarca: detalles.armazonMarca
-      } : undefined,
+      distanciaPupilar: detalles?.dp,
       observaciones: type === 'lejos' ? 'Receta Lejos' : 'Receta Cerca'
     };
 
     this.isLoading = true;
     this.prescriptionsService.create(prescriptionData).subscribe({
-      next: (prescription) => {
+      next: (result) => {
         this.isLoading = false;
+        const prescription = 'prescription' in result ? result.prescription : result;
         this.successMessage = `Receta ${type === 'lejos' ? 'Lejos' : 'Cerca'} guardada exitosamente`;
-        this.formData.recetaId = prescription._id;
         if (type === 'lejos') {
+          this.formData.recetaLejosId = prescription._id;
           this.selectedPrescriptionLejos = prescription;
         } else {
+          this.formData.recetaCercaId = prescription._id;
           this.selectedPrescriptionCerca = prescription;
         }
-        this.loadClientPrescriptions(this.formData.cliente.rut);
+        this.loadClientPrescriptions(this.clienteFormData.rut);
       },
       error: (error) => {
         this.isLoading = false;
@@ -571,6 +607,7 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
   selectExistingPrescription(prescription: Prescription): void {
     if (this.prescriptionFormType === 'lejos') {
       this.selectedPrescriptionLejos = prescription;
+      this.formData.recetaLejosId = prescription._id;
       this.prescriptionFormData.od = {
         esfera: prescription.ojoDerecho?.esfera || '',
         cilindro: prescription.ojoDerecho?.cilindro || '',
@@ -581,13 +618,10 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
         cilindro: prescription.ojoIzquierdo?.cilindro || '',
         grado: prescription.ojoIzquierdo?.eje || ''
       };
-      this.prescriptionFormData.dp = prescription.ojoDerecho?.distanciaPupilar || '';
-      this.prescriptionFormData.cristal = prescription.detallesLentes?.cristal || '';
-      this.prescriptionFormData.codigo = prescription.detallesLentes?.codigo || '';
-      this.prescriptionFormData.color = prescription.detallesLentes?.color || '';
-      this.prescriptionFormData.armazonMarca = prescription.detallesLentes?.armazonMarca || '';
+      this.prescriptionFormData.dp = prescription.distanciaPupilar || '';
     } else {
       this.selectedPrescriptionCerca = prescription;
+      this.formData.recetaCercaId = prescription._id;
       this.prescriptionFormData.od = {
         esfera: prescription.ojoDerecho?.esfera || '',
         cilindro: prescription.ojoDerecho?.cilindro || '',
@@ -599,13 +633,8 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
         grado: prescription.ojoIzquierdo?.eje || ''
       };
       this.prescriptionFormData.add = prescription.ojoDerecho?.adicion || '';
-      this.prescriptionFormData.dp = prescription.ojoIzquierdo?.distanciaPupilar || '';
-      this.prescriptionFormData.cristal = prescription.detallesLentes?.cristal || '';
-      this.prescriptionFormData.codigo = prescription.detallesLentes?.codigo || '';
-      this.prescriptionFormData.color = prescription.detallesLentes?.color || '';
-      this.prescriptionFormData.armazonMarca = prescription.detallesLentes?.armazonMarca || '';
+      this.prescriptionFormData.dp = prescription.distanciaPupilar || '';
     }
-    this.formData.recetaId = prescription._id;
     this.showExistingPrescriptionsList = false;
     this.prescriptionSaveMessage = 'Receta cargada exitosamente';
   }
@@ -618,8 +647,8 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     this.prescriptionSaveError = '';
     this.resetPrescriptionFormData();
     
-    if (this.formData.cliente.rut) {
-      this.loadClientPrescriptions(this.formData.cliente.rut);
+    if (this.clienteFormData.rut) {
+      this.loadClientPrescriptions(this.clienteFormData.rut);
     }
   }
 
@@ -650,7 +679,7 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
   }
 
   savePrescriptionFromModal(): void {
-    if (!this.formData.cliente.rut || !this.formData.cliente.nombre) {
+    if (!this.clienteFormData.rut || !this.clienteFormData.nombre) {
       this.prescriptionSaveError = 'Debe ingresar los datos del cliente primero';
       return;
     }
@@ -661,28 +690,22 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     }
 
     const prescriptionData: CreatePrescriptionDto = {
-      clienteRut: this.formData.cliente.rut,
-      clienteNombre: this.formData.cliente.nombre,
-      clienteTelefono: this.formData.cliente.telefono,
+      clienteRut: this.clienteFormData.rut,
+      clienteNombre: this.clienteFormData.nombre,
+      clienteTelefono: this.clienteFormData.telefono,
+      tipo: this.prescriptionFormType,
       ojoDerecho: this.prescriptionFormData.od.esfera ? {
         esfera: this.prescriptionFormData.od.esfera,
         cilindro: this.prescriptionFormData.od.cilindro,
         eje: this.prescriptionFormData.od.grado,
-        distanciaPupilar: this.prescriptionFormData.dp,
         adicion: this.prescriptionFormType === 'cerca' ? this.prescriptionFormData.add : undefined
       } : undefined,
       ojoIzquierdo: this.prescriptionFormData.oi.esfera ? {
         esfera: this.prescriptionFormData.oi.esfera,
         cilindro: this.prescriptionFormData.oi.cilindro,
-        eje: this.prescriptionFormData.oi.grado,
-        distanciaPupilar: this.prescriptionFormData.dp
+        eje: this.prescriptionFormData.oi.grado
       } : undefined,
-      detallesLentes: {
-        cristal: this.prescriptionFormData.cristal,
-        codigo: this.prescriptionFormData.codigo,
-        color: this.prescriptionFormData.color,
-        armazonMarca: this.prescriptionFormData.armazonMarca
-      },
+      distanciaPupilar: this.prescriptionFormData.dp,
       observaciones: this.prescriptionFormType === 'lejos' ? 'Receta Lejos' : 'Receta Cerca'
     };
 
@@ -691,16 +714,18 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     this.prescriptionSaveError = '';
 
     this.prescriptionsService.create(prescriptionData).subscribe({
-      next: (prescription) => {
+      next: (result) => {
         this.savingPrescription = false;
+        const prescription = 'prescription' in result ? result.prescription : result;
         this.prescriptionSaveMessage = `Receta ${this.prescriptionFormType === 'lejos' ? 'Lejos' : 'Cerca'} guardada exitosamente`;
-        this.formData.recetaId = prescription._id;
         if (this.prescriptionFormType === 'lejos') {
+          this.formData.recetaLejosId = prescription._id;
           this.selectedPrescriptionLejos = prescription;
         } else {
+          this.formData.recetaCercaId = prescription._id;
           this.selectedPrescriptionCerca = prescription;
         }
-        this.loadClientPrescriptions(this.formData.cliente.rut);
+        this.loadClientPrescriptions(this.clienteFormData.rut);
       },
       error: (error) => {
         this.savingPrescription = false;
@@ -714,5 +739,26 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
       return order.numeroOrdenManual;
     }
     return `#${order.numeroOrden}`;
+  }
+
+  getClientName(order: WorkOrder): string {
+    if (typeof order.clienteId === 'object' && order.clienteId) {
+      return order.clienteId.nombre || '-';
+    }
+    return '-';
+  }
+
+  getClientRut(order: WorkOrder): string {
+    if (typeof order.clienteId === 'object' && order.clienteId) {
+      return order.clienteId.rut || '-';
+    }
+    return '-';
+  }
+
+  getClientPhone(order: WorkOrder): string {
+    if (typeof order.clienteId === 'object' && order.clienteId) {
+      return order.clienteId.telefono || '-';
+    }
+    return '-';
   }
 }

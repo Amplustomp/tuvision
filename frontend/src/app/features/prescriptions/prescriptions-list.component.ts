@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { PrescriptionsService } from '../../core/services/prescriptions.service';
 import { AuthService } from '../../core/services/auth.service';
-import { Prescription, CreatePrescriptionDto, UpdatePrescriptionDto, EyeData } from '../../core/models';
+import { Prescription, CreatePrescriptionDto, UpdatePrescriptionDto, EyeData, PrescriptionType } from '../../core/models';
 
 @Component({
   selector: 'app-prescriptions-list',
@@ -60,26 +60,20 @@ export class PrescriptionsListComponent implements OnInit, OnDestroy {
       clienteRut: '',
       clienteNombre: '',
       clienteTelefono: '',
+      tipo: 'lejos' as PrescriptionType,
       ojoDerecho: {
         esfera: '',
         cilindro: '',
         eje: '',
-        adicion: '',
-        distanciaPupilar: ''
+        adicion: ''
       },
       ojoIzquierdo: {
         esfera: '',
         cilindro: '',
         eje: '',
-        adicion: '',
-        distanciaPupilar: ''
+        adicion: ''
       },
-      detallesLentes: {
-        cristal: '',
-        codigo: '',
-        color: '',
-        armazonMarca: ''
-      },
+      distanciaPupilar: '',
       observaciones: ''
     };
   }
@@ -154,9 +148,10 @@ export class PrescriptionsListComponent implements OnInit, OnDestroy {
       clienteRut: prescription.clienteRut,
       clienteNombre: prescription.clienteNombre,
       clienteTelefono: prescription.clienteTelefono || '',
+      tipo: prescription.tipo,
       ojoDerecho: prescription.ojoDerecho ? { ...prescription.ojoDerecho } : this.getEmptyFormData().ojoDerecho,
       ojoIzquierdo: prescription.ojoIzquierdo ? { ...prescription.ojoIzquierdo } : this.getEmptyFormData().ojoIzquierdo,
-      detallesLentes: prescription.detallesLentes ? { ...prescription.detallesLentes } : this.getEmptyFormData().detallesLentes,
+      distanciaPupilar: prescription.distanciaPupilar || '',
       observaciones: prescription.observaciones || ''
     };
     this.showModal = true;
