@@ -7,7 +7,6 @@ import {
   Param,
   Delete,
   UseGuards,
-  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -15,7 +14,6 @@ import {
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
-  ApiQuery,
 } from '@nestjs/swagger';
 import { WorkOrdersService } from './work-orders.service';
 import { CreateWorkOrderDto, UpdateWorkOrderDto } from './dto';
@@ -57,20 +55,20 @@ export class WorkOrdersController {
     return this.workOrdersService.findAll();
   }
 
-  @Get('by-rut')
+  @Get('by-client/:clienteId')
   @ApiOperation({
-    summary: 'Buscar por RUT',
-    description: 'Busca órdenes de trabajo por RUT del cliente',
+    summary: 'Buscar por cliente',
+    description: 'Busca órdenes de trabajo por ID del cliente',
   })
-  @ApiQuery({
-    name: 'rut',
-    description: 'RUT del cliente',
-    example: '12.345.678-9',
+  @ApiParam({
+    name: 'clienteId',
+    description: 'ID del cliente',
+    example: '507f1f77bcf86cd799439011',
   })
   @ApiResponse({ status: 200, description: 'Órdenes encontradas' })
   @ApiResponse({ status: 401, description: 'No autorizado' })
-  findByCustomerRut(@Query('rut') rut: string) {
-    return this.workOrdersService.findByCustomerRut(rut);
+  findByClientId(@Param('clienteId') clienteId: string) {
+    return this.workOrdersService.findByClientId(clienteId);
   }
 
   @Get('by-number/:numeroOrden')

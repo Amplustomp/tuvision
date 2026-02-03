@@ -1,3 +1,6 @@
+import { Client } from './client.model';
+import { Prescription } from './prescription.model';
+
 export type WorkOrderType = 'armazon' | 'lentes' | 'lente_completo';
 export type PaymentMethod = 'efectivo' | 'transferencia' | 'tarjeta';
 export type OrderNumberType = 'tu_vision' | 'opticolors' | 'optiva_vr';
@@ -29,13 +32,6 @@ export interface MedicalPrescription {
   detallesCerca?: LensDetailsData;
 }
 
-export interface CustomerData {
-  nombre: string;
-  rut: string;
-  telefono?: string;
-  email?: string;
-}
-
 export interface PurchaseData {
   totalVenta: number;
   abono?: number;
@@ -50,8 +46,9 @@ export interface WorkOrder {
   numeroOrdenManual?: string;
   tipoNumeroOrden: OrderNumberType;
   tipoOrden: WorkOrderType;
-  cliente: CustomerData;
-  recetaId?: string;
+  clienteId: Client | string;
+  recetaLejosId?: Prescription | string;
+  recetaCercaId?: Prescription | string;
   receta?: MedicalPrescription;
   compra: PurchaseData;
   fechaVenta: string;
@@ -74,8 +71,9 @@ export interface CreateWorkOrderDto {
   tipoNumeroOrden: OrderNumberType;
   numeroOrdenManual?: string;
   tipoOrden: WorkOrderType;
-  cliente: CustomerData;
-  recetaId?: string;
+  clienteId: string;
+  recetaLejosId?: string;
+  recetaCercaId?: string;
   receta?: MedicalPrescription;
   compra: PurchaseData;
   fechaVenta: string;

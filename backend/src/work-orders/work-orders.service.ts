@@ -29,12 +29,16 @@ export class WorkOrdersService {
       numeroOrden,
       creadoPor: userId,
     });
-    return createdWorkOrder.save();
+    const savedWorkOrder = await createdWorkOrder.save();
+    return this.findOne(savedWorkOrder._id.toString());
   }
 
   async findAll(): Promise<WorkOrderDocument[]> {
     return this.workOrderModel
       .find()
+      .populate('clienteId', 'nombre rut telefono email')
+      .populate('recetaLejosId')
+      .populate('recetaCercaId')
       .populate('creadoPor', 'nombre email')
       .populate('actualizadoPor', 'nombre email')
       .sort({ createdAt: -1 })
@@ -44,6 +48,9 @@ export class WorkOrdersService {
   async findOne(id: string): Promise<WorkOrderDocument> {
     const workOrder = await this.workOrderModel
       .findById(id)
+      .populate('clienteId', 'nombre rut telefono email')
+      .populate('recetaLejosId')
+      .populate('recetaCercaId')
       .populate('creadoPor', 'nombre email')
       .populate('actualizadoPor', 'nombre email')
       .exec();
@@ -56,6 +63,9 @@ export class WorkOrdersService {
   async findByOrderNumber(numeroOrden: number): Promise<WorkOrderDocument> {
     const workOrder = await this.workOrderModel
       .findOne({ numeroOrden })
+      .populate('clienteId', 'nombre rut telefono email')
+      .populate('recetaLejosId')
+      .populate('recetaCercaId')
       .populate('creadoPor', 'nombre email')
       .populate('actualizadoPor', 'nombre email')
       .exec();
@@ -76,6 +86,9 @@ export class WorkOrdersService {
         { ...updateWorkOrderDto, actualizadoPor: userId },
         { new: true },
       )
+      .populate('clienteId', 'nombre rut telefono email')
+      .populate('recetaLejosId')
+      .populate('recetaCercaId')
       .populate('creadoPor', 'nombre email')
       .populate('actualizadoPor', 'nombre email')
       .exec();
@@ -93,9 +106,12 @@ export class WorkOrdersService {
     }
   }
 
-  async findByCustomerRut(rut: string): Promise<WorkOrderDocument[]> {
+  async findByClientId(clienteId: string): Promise<WorkOrderDocument[]> {
     return this.workOrderModel
-      .find({ 'cliente.rut': rut })
+      .find({ clienteId })
+      .populate('clienteId', 'nombre rut telefono email')
+      .populate('recetaLejosId')
+      .populate('recetaCercaId')
       .populate('creadoPor', 'nombre email')
       .populate('actualizadoPor', 'nombre email')
       .sort({ createdAt: -1 })

@@ -179,6 +179,23 @@
         </div>
 
         <div class="form-section">
+          <h3>Tipo de Receta</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tipoReceta">Tipo *</label>
+              <select id="tipoReceta" [(ngModel)]="formData.tipo">
+                <option value="lejos">Lejos</option>
+                <option value="cerca">Cerca</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="distanciaPupilar">Distancia Pupilar (DP)</label>
+              <input type="text" id="distanciaPupilar" [(ngModel)]="formData.distanciaPupilar" placeholder="63" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
           <h3>Receta</h3>
           <div class="receta-grid">
             <div class="receta-column">
@@ -201,12 +218,6 @@
                 <div class="form-group">
                   <label for="odAdicion">Adicion</label>
                   <input type="text" id="odAdicion" [(ngModel)]="formData.ojoDerecho!.adicion" placeholder="+2.00" />
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="odDp">DP</label>
-                  <input type="text" id="odDp" [(ngModel)]="formData.ojoDerecho!.distanciaPupilar" placeholder="32" />
                 </div>
               </div>
             </div>
@@ -232,36 +243,6 @@
                   <input type="text" id="oiAdicion" [(ngModel)]="formData.ojoIzquierdo!.adicion" placeholder="+2.00" />
                 </div>
               </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="oiDp">DP</label>
-                  <input type="text" id="oiDp" [(ngModel)]="formData.ojoIzquierdo!.distanciaPupilar" placeholder="32" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <h3>Detalles de Lentes</h3>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="cristal">Tipo de Cristal</label>
-              <input type="text" id="cristal" [(ngModel)]="formData.detallesLentes!.cristal" placeholder="Policarbonato" />
-            </div>
-            <div class="form-group">
-              <label for="codigo">Codigo</label>
-              <input type="text" id="codigo" [(ngModel)]="formData.detallesLentes!.codigo" placeholder="PC-001" />
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="colorLente">Color</label>
-              <input type="text" id="colorLente" [(ngModel)]="formData.detallesLentes!.color" placeholder="Transparente" />
-            </div>
-            <div class="form-group">
-              <label for="armazonMarca">Marca Armazon</label>
-              <input type="text" id="armazonMarca" [(ngModel)]="formData.detallesLentes!.armazonMarca" placeholder="Ray-Ban" />
             </div>
           </div>
         </div>
@@ -327,6 +308,16 @@
 
         <div class="detail-section">
           <h3>Receta</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Tipo:</span>
+              <span class="detail-value">{{ detailPrescription.tipo === 'lejos' ? 'Lejos' : 'Cerca' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Distancia Pupilar (DP):</span>
+              <span class="detail-value">{{ detailPrescription.distanciaPupilar || '-' }}</span>
+            </div>
+          </div>
           <div class="receta-detail-grid">
             <div class="receta-detail-column">
               <h4>Ojo Derecho (OD)</h4>
@@ -345,10 +336,6 @@
               <div class="detail-item">
                 <span class="detail-label">Adicion:</span>
                 <span class="detail-value">{{ detailPrescription.ojoDerecho?.adicion || '-' }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">DP:</span>
-                <span class="detail-value">{{ detailPrescription.ojoDerecho?.distanciaPupilar || '-' }}</span>
               </div>
             </div>
             <div class="receta-detail-column">
@@ -369,32 +356,6 @@
                 <span class="detail-label">Adicion:</span>
                 <span class="detail-value">{{ detailPrescription.ojoIzquierdo?.adicion || '-' }}</span>
               </div>
-              <div class="detail-item">
-                <span class="detail-label">DP:</span>
-                <span class="detail-value">{{ detailPrescription.ojoIzquierdo?.distanciaPupilar || '-' }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="detail-section">
-          <h3>Detalles de Lentes</h3>
-          <div class="detail-grid">
-            <div class="detail-item">
-              <span class="detail-label">Tipo de Cristal:</span>
-              <span class="detail-value">{{ detailPrescription.detallesLentes?.cristal || '-' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Codigo:</span>
-              <span class="detail-value">{{ detailPrescription.detallesLentes?.codigo || '-' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Color:</span>
-              <span class="detail-value">{{ detailPrescription.detallesLentes?.color || '-' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-label">Marca Armazon:</span>
-              <span class="detail-value">{{ detailPrescription.detallesLentes?.armazonMarca || '-' }}</span>
             </div>
           </div>
         </div>

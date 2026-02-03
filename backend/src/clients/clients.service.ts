@@ -14,7 +14,10 @@ export class ClientsService {
     @InjectModel(Client.name) private clientModel: Model<ClientDocument>,
   ) {}
 
-  async create(createClientDto: CreateClientDto, user: { userId: string; email: string; role: string }): Promise<Client> {
+  async create(
+    createClientDto: CreateClientDto,
+    user: { userId: string; email: string; role: string },
+  ): Promise<Client> {
     const existingClient = await this.clientModel.findOne({
       rut: createClientDto.rut,
     });

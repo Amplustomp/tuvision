@@ -98,6 +98,44 @@ export class PrescriptionsController {
     return this.prescriptionsService.findLatestByClientRut(rut);
   }
 
+  @Get('by-rut-and-type')
+  @ApiOperation({ summary: 'Obtener recetas por RUT del cliente y tipo' })
+  @ApiQuery({ name: 'rut', required: true, description: 'RUT del cliente' })
+  @ApiQuery({
+    name: 'tipo',
+    required: true,
+    description: 'Tipo de receta (lejos/cerca)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de recetas del cliente por tipo',
+  })
+  findByClientRutAndType(
+    @Query('rut') rut: string,
+    @Query('tipo') tipo: string,
+  ) {
+    return this.prescriptionsService.findByClientRutAndType(rut, tipo);
+  }
+
+  @Get('latest-by-rut-and-type')
+  @ApiOperation({ summary: 'Obtener ultima receta por RUT del cliente y tipo' })
+  @ApiQuery({ name: 'rut', required: true, description: 'RUT del cliente' })
+  @ApiQuery({
+    name: 'tipo',
+    required: true,
+    description: 'Tipo de receta (lejos/cerca)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Ultima receta del cliente por tipo',
+  })
+  findLatestByClientRutAndType(
+    @Query('rut') rut: string,
+    @Query('tipo') tipo: string,
+  ) {
+    return this.prescriptionsService.findLatestByClientRutAndType(rut, tipo);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtener receta por ID' })
   @ApiResponse({ status: 200, description: 'Receta encontrada' })

@@ -2,7 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Prescription, CreatePrescriptionDto, UpdatePrescriptionDto } from '../models';
+import {
+  Prescription,
+  CreatePrescriptionDto,
+  UpdatePrescriptionDto,
+  CreatePrescriptionResult,
+  PrescriptionType
+} from '../models';
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +35,16 @@ export class PrescriptionsService {
     return this.http.get<Prescription | null>(`${this.API_URL}/latest-by-rut`, { params });
   }
 
+  getByClientRutAndType(rut: string, tipo: PrescriptionType): Observable<Prescription[]> {
+    const params = new HttpParams().set('rut', rut).set('tipo', tipo);
+    return this.http.get<Prescription[]>(`${this.API_URL}/by-rut-and-type`, { params });
+  }
+
+  getLatestByClientRutAndType(rut: string, tipo: PrescriptionType): Observable<Prescription | null> {
+    const params = new HttpParams().set('rut', rut).set('tipo', tipo);
+    return this.http.get<Prescription | null>(`${this.API_URL}/latest-by-rut-and-type`, { params });
+  }
+
   search(filters: {
     rut?: string;
     nombre?: string;
@@ -43,8 +59,8 @@ export class PrescriptionsService {
     return this.http.get<Prescription[]>(`${this.API_URL}/search`, { params });
   }
 
-  create(prescription: CreatePrescriptionDto): Observable<Prescription> {
-    return this.http.post<Prescription>(this.API_URL, prescription);
+  create(prescription: CreatePrescriptionDto): Observable<CreatePrescriptionResult> {
+    return this.http.post<CreatePrescriptionResult>(this.API_URL, prescription);
   }
 
   update(id: string, prescription: UpdatePrescriptionDto): Observable<Prescription> {
