@@ -1015,6 +1015,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.5rem;
 
     .prescription-date {
       font-weight: 600;
@@ -1024,6 +1025,25 @@
     .prescription-client {
       font-size: 0.875rem;
       color: #666;
+    }
+
+    .prescription-type-badge {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+
+      &.tipo-lejos {
+        background-color: #dbeafe;
+        color: #1d4ed8;
+      }
+
+      &.tipo-cerca {
+        background-color: #fef3c7;
+        color: #b45309;
+      }
     }
   }
 

@@ -596,7 +596,9 @@
                 <button type="button" class="prescription-item" (click)="selectExistingPrescription(prescription)">
                   <div class="prescription-info">
                     <span class="prescription-date">{{ formatDate(prescription.createdAt) }}</span>
-                    <span class="prescription-client">{{ prescription.clienteNombre }}</span>
+                    <span class="prescription-type-badge" [class.tipo-lejos]="prescription.tipo === 'lejos'" [class.tipo-cerca]="prescription.tipo === 'cerca'">
+                      {{ prescription.tipo === 'lejos' ? 'LEJOS' : 'CERCA' }}
+                    </span>
                   </div>
                   <div class="prescription-details">
                     @if (prescription.ojoDerecho) {
@@ -605,13 +607,16 @@
                     @if (prescription.ojoIzquierdo) {
                       <span class="detail-badge">OI: {{ prescription.ojoIzquierdo.esfera || '-' }}</span>
                     }
+                    @if (prescription.distanciaPupilar) {
+                      <span class="detail-badge">DP: {{ prescription.distanciaPupilar }}</span>
+                    }
                   </div>
                 </button>
               }
             </div>
             <button type="button" class="btn-outline" (click)="hideExistingPrescriptions()">Volver al formulario</button>
           </div>
-        } @else {
+        }@else {
           <div class="receta-grid">
             <div class="receta-column">
               <h4>Ojo Derecho (OD)</h4>
