@@ -27,5 +27,4 @@ export class Client {
 
 export const ClientSchema = SchemaFactory.createForClass(Client);
 
-ClientSchema.index({ rut: 1 });
 ClientSchema.index({ nombre: 'text' });
