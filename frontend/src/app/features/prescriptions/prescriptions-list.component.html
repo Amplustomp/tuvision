@@ -90,47 +90,138 @@
       </div>
     } @else {
       <div class="cards-container">
-        @for (prescription of filteredPrescriptions; track prescription._id) {
-          <div class="prescription-card">
+        @for (client of groupedByClient; track client.clienteRut) {
+          <div class="client-card">
             <div class="card-header">
               <div class="client-info">
-                <span class="client-name">{{ prescription.clienteNombre }}</span>
-                <span class="client-rut">{{ prescription.clienteRut }}</span>
+                <span class="client-name">{{ client.clienteNombre }}</span>
+                <span class="client-rut">{{ client.clienteRut }}</span>
               </div>
-              <span class="prescription-date">{{ formatDate(prescription.createdAt) }}</span>
+              <span class="prescription-date">{{ formatDate(client.latestDate) }}</span>
             </div>
             <div class="card-body">
-              <div class="eye-info">
-                <div class="eye-row">
-                  <span class="label">OD:</span>
-                  <span class="value">{{ formatEyeData(prescription.ojoDerecho) }}</span>
+              @if (client.prescriptionsLejos.length > 0) {
+                <div class="prescription-type-section">
+                  <button class="type-header" (click)="toggleExpandLejos(client)">
+                    <div class="type-info">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="6" cy="6" r="3"></circle>
+                        <circle cx="6" cy="18" r="3"></circle>
+                        <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+                        <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+                        <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+                      </svg>
+                      <span class="type-label">Lejos</span>
+                      <span class="type-count">({{ client.prescriptionsLejos.length }})</span>
+                    </div>
+                    <svg class="expand-icon" [class.expanded]="client.expandedLejos" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  @if (client.expandedLejos) {
+                    <div class="prescriptions-list">
+                      @for (prescription of client.prescriptionsLejos; track prescription._id) {
+                        <div class="prescription-item">
+                          <div class="prescription-item-header">
+                            <span class="prescription-item-date">{{ formatDate(prescription.createdAt) }}</span>
+                            <div class="prescription-item-actions">
+                              <button class="btn-icon-small" title="Ver detalle" (click)="openDetailModal(prescription)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                  <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                              </button>
+                              @if (isAdmin) {
+                                <button class="btn-icon-small" title="Editar" (click)="openEditModal(prescription)">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                  </svg>
+                                </button>
+                                <button class="btn-icon-small btn-danger" title="Eliminar" (click)="confirmDelete(prescription)">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                  </svg>
+                                </button>
+                              }
+                            </div>
+                          </div>
+                          <div class="eye-info">
+                            <div class="eye-row">
+                              <span class="label">OD:</span>
+                              <span class="value">{{ formatEyeData(prescription.ojoDerecho) }}</span>
+                            </div>
+                            <div class="eye-row">
+                              <span class="label">OI:</span>
+                              <span class="value">{{ formatEyeData(prescription.ojoIzquierdo) }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
                 </div>
-                <div class="eye-row">
-                  <span class="label">OI:</span>
-                  <span class="value">{{ formatEyeData(prescription.ojoIzquierdo) }}</span>
+              }
+              @if (client.prescriptionsCerca.length > 0) {
+                <div class="prescription-type-section">
+                  <button class="type-header" (click)="toggleExpandCerca(client)">
+                    <div class="type-info">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                      </svg>
+                      <span class="type-label">Cerca</span>
+                      <span class="type-count">({{ client.prescriptionsCerca.length }})</span>
+                    </div>
+                    <svg class="expand-icon" [class.expanded]="client.expandedCerca" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  @if (client.expandedCerca) {
+                    <div class="prescriptions-list">
+                      @for (prescription of client.prescriptionsCerca; track prescription._id) {
+                        <div class="prescription-item">
+                          <div class="prescription-item-header">
+                            <span class="prescription-item-date">{{ formatDate(prescription.createdAt) }}</span>
+                            <div class="prescription-item-actions">
+                              <button class="btn-icon-small" title="Ver detalle" (click)="openDetailModal(prescription)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                  <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                              </button>
+                              @if (isAdmin) {
+                                <button class="btn-icon-small" title="Editar" (click)="openEditModal(prescription)">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                  </svg>
+                                </button>
+                                <button class="btn-icon-small btn-danger" title="Eliminar" (click)="confirmDelete(prescription)">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                  </svg>
+                                </button>
+                              }
+                            </div>
+                          </div>
+                          <div class="eye-info">
+                            <div class="eye-row">
+                              <span class="label">OD:</span>
+                              <span class="value">{{ formatEyeData(prescription.ojoDerecho) }}</span>
+                            </div>
+                            <div class="eye-row">
+                              <span class="label">OI:</span>
+                              <span class="value">{{ formatEyeData(prescription.ojoIzquierdo) }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
                 </div>
-              </div>
-            </div>
-            <div class="card-actions">
-              <button class="btn-icon" title="Ver detalle" (click)="openDetailModal(prescription)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
-              @if (isAdmin) {
-                <button class="btn-icon" title="Editar" (click)="openEditModal(prescription)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
-                </button>
-                <button class="btn-icon btn-danger" title="Eliminar" (click)="confirmDelete(prescription)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  </svg>
-                </button>
               }
             </div>
           </div>

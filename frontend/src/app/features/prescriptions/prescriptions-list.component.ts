@@ -6,6 +6,17 @@ import { PrescriptionsService } from '../../core/services/prescriptions.service'
 import { AuthService } from '../../core/services/auth.service';
 import { Prescription, CreatePrescriptionDto, UpdatePrescriptionDto, EyeData, PrescriptionType } from '../../core/models';
 
+export interface ClientPrescriptions {
+  clienteRut: string;
+  clienteNombre: string;
+  clienteTelefono?: string;
+  prescriptionsLejos: Prescription[];
+  prescriptionsCerca: Prescription[];
+  latestDate: string;
+  expandedLejos: boolean;
+  expandedCerca: boolean;
+}
+
 @Component({
   selector: 'app-prescriptions-list',
   standalone: true,
@@ -16,6 +27,7 @@ import { Prescription, CreatePrescriptionDto, UpdatePrescriptionDto, EyeData, Pr
 export class PrescriptionsListComponent implements OnInit, OnDestroy {
   prescriptions: Prescription[] = [];
   filteredPrescriptions: Prescription[] = [];
+  groupedByClient: ClientPrescriptions[] = [];
   isLoading = false;
   errorMessage = '';
   successMessage = '';
@@ -100,6 +112,7 @@ export class PrescriptionsListComponent implements OnInit, OnDestroy {
       this.filteredPrescriptions = [...this.prescriptions].sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
+      this.groupPrescriptionsByClient();
       return;
     }
 
@@ -112,6 +125,7 @@ export class PrescriptionsListComponent implements OnInit, OnDestroy {
     }).subscribe({
       next: (prescriptions) => {
         this.filteredPrescriptions = prescriptions;
+        this.groupPrescriptionsByClient();
         this.isLoading = false;
       },
       error: (error) => {
@@ -120,6 +134,62 @@ export class PrescriptionsListComponent implements OnInit, OnDestroy {
         console.error('Error searching prescriptions:', error);
       }
     });
+  }
+
+  private groupPrescriptionsByClient(): void {
+    const clientMap = new Map<string, ClientPrescriptions>();
+
+    for (const prescription of this.filteredPrescriptions) {
+      const rut = prescription.clienteRut;
+      
+      if (!clientMap.has(rut)) {
+        clientMap.set(rut, {
+          clienteRut: rut,
+          clienteNombre: prescription.clienteNombre,
+          clienteTelefono: prescription.clienteTelefono,
+          prescriptionsLejos: [],
+          prescriptionsCerca: [],
+          latestDate: prescription.createdAt,
+          expandedLejos: false,
+          expandedCerca: false
+        });
+      }
+
+      const clientData = clientMap.get(rut)!;
+      
+      if (prescription.tipo === 'lejos') {
+        clientData.prescriptionsLejos.push(prescription);
+      } else {
+        clientData.prescriptionsCerca.push(prescription);
+      }
+
+      if (new Date(prescription.createdAt) > new Date(clientData.latestDate)) {
+        clientData.latestDate = prescription.createdAt;
+        clientData.clienteNombre = prescription.clienteNombre;
+        clientData.clienteTelefono = prescription.clienteTelefono;
+      }
+    }
+
+    for (const clientData of clientMap.values()) {
+      clientData.prescriptionsLejos.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      clientData.prescriptionsCerca.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+    }
+
+    this.groupedByClient = Array.from(clientMap.values()).sort(
+      (a, b) => new Date(b.latestDate).getTime() - new Date(a.latestDate).getTime()
+    );
+  }
+
+  toggleExpandLejos(client: ClientPrescriptions): void {
+    client.expandedLejos = !client.expandedLejos;
+  }
+
+  toggleExpandCerca(client: ClientPrescriptions): void {
+    client.expandedCerca = !client.expandedCerca;
   }
 
   clearFilters(): void {
