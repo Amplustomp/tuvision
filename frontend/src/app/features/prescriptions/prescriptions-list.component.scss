@@ -314,6 +314,182 @@
   }
 }
 
+.client-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    background: #f9fafb;
+  }
+
+  .client-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .client-name {
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 0.9375rem;
+  }
+
+  .client-rut {
+    font-size: 0.8125rem;
+    color: #0e903c;
+  }
+
+  .prescription-date {
+    font-size: 0.8125rem;
+    color: #666;
+  }
+
+  .card-body {
+    padding: 0;
+  }
+}
+
+.prescription-type-section {
+  border-bottom: 1px solid #f3f4f6;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.type-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f9fafb;
+  }
+
+  .type-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    svg {
+      color: #0e903c;
+    }
+  }
+
+  .type-label {
+    font-weight: 600;
+    color: #1a1a1a;
+    font-size: 0.9375rem;
+  }
+
+  .type-count {
+    font-size: 0.8125rem;
+    color: #666;
+  }
+
+  .expand-icon {
+    color: #666;
+    transition: transform 0.2s;
+
+    &.expanded {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.prescriptions-list {
+  padding: 0 1rem 1rem 1rem;
+}
+
+.prescription-item {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.prescription-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.prescription-item-date {
+  font-size: 0.8125rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.prescription-item-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.btn-icon-small {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #ffffff;
+    color: #333;
+  }
+
+  &.btn-danger:hover {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+    color: #dc2626;
+  }
+}
+
+.eye-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.eye-row {
+  display: flex;
+  gap: 0.5rem;
+
+  .label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #0e903c;
+    min-width: 30px;
+  }
+
+  .value {
+    font-size: 0.8125rem;
+    color: #666;
+  }
+}
+
 .btn-icon {
   width: 36px;
   height: 36px;
