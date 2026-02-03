@@ -33,6 +33,7 @@ export interface CustomerData {
   nombre: string;
   rut: string;
   telefono?: string;
+  email?: string;
 }
 
 export interface PurchaseData {
