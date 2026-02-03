@@ -267,17 +267,25 @@
                     <div class="prescription-header">
                       <h3>Receta Medica - Lejos</h3>
                       <div class="prescription-actions">
-                        <button type="button" class="btn-prescription" (click)="openPrescriptionModal('lejos')" title="Seleccionar o crear receta lejos">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="10.5" cy="7.5" r="2.5"></circle>
-                            <circle cx="22" cy="7.5" r="2.5"></circle>
-                            <path d="M2 7.5h6"></path>
-                            <path d="M13 7.5h6"></path>
-                            <path d="M5 10v4a2 2 0 0 0 2 2h2"></path>
-                            <path d="M19 10v4a2 2 0 0 1-2 2h-2"></path>
-                          </svg>
-                          Ingresar Receta Lejos
-                        </button>
+                                                <button type="button" class="btn-prescription" (click)="savePrescriptionFromForm('lejos')" title="Guardar receta lejos">
+                                                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <circle cx="10.5" cy="7.5" r="2.5"></circle>
+                                                    <circle cx="22" cy="7.5" r="2.5"></circle>
+                                                    <path d="M2 7.5h6"></path>
+                                                    <path d="M13 7.5h6"></path>
+                                                    <path d="M5 10v4a2 2 0 0 0 2 2h2"></path>
+                                                    <path d="M19 10v4a2 2 0 0 1-2 2h-2"></path>
+                                                  </svg>
+                                                  Guardar Receta Lejos
+                                                </button>
+                                                <button type="button" class="btn-prescription btn-prescription-select" (click)="openPrescriptionModal('lejos')" title="Seleccionar receta existente">
+                                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                                  </svg>
+                                                  Cargar Existente
+                                                </button>
                         @if (selectedPrescriptionLejos) {
                           <span class="prescription-selected">Receta seleccionada</span>
                         }
@@ -349,16 +357,24 @@
                       <div class="prescription-header">
                         <h3>Receta Medica - Cerca</h3>
                         <div class="prescription-actions">
-                          <button type="button" class="btn-prescription" (click)="openPrescriptionModal('cerca')" title="Seleccionar o crear receta cerca">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-                              <circle cx="12" cy="12" r="3"></circle>
-                              <path d="M6 19l-2 2"></path>
-                              <path d="M18 19l2 2"></path>
-                              <rect x="6" y="16" width="12" height="6" rx="1"></rect>
-                            </svg>
-                            Ingresar Receta Cerca
-                          </button>
+                                                    <button type="button" class="btn-prescription" (click)="savePrescriptionFromForm('cerca')" title="Guardar receta cerca">
+                                                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                                                        <circle cx="12" cy="12" r="3"></circle>
+                                                        <path d="M6 19l-2 2"></path>
+                                                        <path d="M18 19l2 2"></path>
+                                                        <rect x="6" y="16" width="12" height="6" rx="1"></rect>
+                                                      </svg>
+                                                      Guardar Receta Cerca
+                                                    </button>
+                                                    <button type="button" class="btn-prescription btn-prescription-select" (click)="openPrescriptionModal('cerca')" title="Seleccionar receta existente">
+                                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                                      </svg>
+                                                      Cargar Existente
+                                                    </button>
                           @if (selectedPrescriptionCerca) {
                             <span class="prescription-selected">Receta seleccionada</span>
                           }

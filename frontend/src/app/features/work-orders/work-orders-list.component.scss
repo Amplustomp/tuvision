@@ -916,6 +916,18 @@
   svg {
     flex-shrink: 0;
   }
+
+  &.btn-prescription-select {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
+
+    &:hover {
+      background: #e5e7eb;
+    }
+  }
 }
 
 .prescription-selected {

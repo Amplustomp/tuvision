@@ -6,7 +6,7 @@ import { WorkOrdersService } from '../../core/services/work-orders.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PrescriptionsService } from '../../core/services/prescriptions.service';
 import { ClientsService } from '../../core/services/clients.service';
-import { WorkOrder, CreateWorkOrderDto, UpdateWorkOrderDto, WorkOrderType, PaymentMethod, OrderNumberType, Prescription, Client } from '../../core/models';
+import { WorkOrder, CreateWorkOrderDto, UpdateWorkOrderDto, WorkOrderType, PaymentMethod, OrderNumberType, Prescription, Client, CreatePrescriptionDto, CreateClientDto } from '../../core/models';
 
 @Component({
   selector: 'app-work-orders-list',
@@ -253,18 +253,44 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
         }
       });
     } else {
-      this.workOrdersService.create(this.formData).subscribe({
-        next: () => {
-          this.successMessage = 'Orden creada exitosamente';
-          this.closeModal();
-          this.loadWorkOrders();
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.errorMessage = error.error?.message || 'Error al crear orden';
-        }
-      });
+      if (this.isNewClient) {
+        const clientData: CreateClientDto = {
+          nombre: this.formData.cliente.nombre,
+          rut: this.formData.cliente.rut,
+          telefono: this.formData.cliente.telefono
+        };
+        this.clientsService.create(clientData).subscribe({
+          next: () => {
+            this.createWorkOrderAfterClient();
+          },
+          error: (error) => {
+            if (error.status === 409) {
+              this.createWorkOrderAfterClient();
+            } else {
+              this.isLoading = false;
+              this.errorMessage = error.error?.message || 'Error al crear cliente';
+            }
+          }
+        });
+      } else {
+        this.createWorkOrderAfterClient();
+      }
     }
+  }
+
+  private createWorkOrderAfterClient(): void {
+    this.workOrdersService.create(this.formData).subscribe({
+      next: () => {
+        this.successMessage = 'Orden creada exitosamente';
+        this.closeModal();
+        this.loadWorkOrders();
+        this.loadClients();
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessage = error.error?.message || 'Error al crear orden';
+      }
+    });
   }
 
   confirmDelete(order: WorkOrder): void {
@@ -425,6 +451,65 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
 
   closePrescriptionModal(): void {
     this.showPrescriptionModal = false;
+  }
+
+  savePrescriptionFromForm(type: 'lejos' | 'cerca'): void {
+    if (!this.formData.cliente.rut || !this.formData.cliente.nombre) {
+      this.errorMessage = 'Debe ingresar los datos del cliente primero';
+      return;
+    }
+
+    const recetaData = type === 'lejos' ? this.formData.receta?.lejos : this.formData.receta?.cerca;
+    const detalles = type === 'lejos' ? this.formData.receta?.detallesLejos : this.formData.receta?.detallesCerca;
+
+    if (!recetaData?.od?.esfera && !recetaData?.oi?.esfera) {
+      this.errorMessage = 'Debe ingresar al menos los datos de esfera para guardar la receta';
+      return;
+    }
+
+    const prescriptionData: CreatePrescriptionDto = {
+      clienteRut: this.formData.cliente.rut,
+      clienteNombre: this.formData.cliente.nombre,
+      clienteTelefono: this.formData.cliente.telefono,
+      ojoDerecho: recetaData?.od ? {
+        esfera: recetaData.od.esfera,
+        cilindro: recetaData.od.cilindro,
+        eje: recetaData.od.grado,
+        distanciaPupilar: detalles?.dp
+      } : undefined,
+      ojoIzquierdo: recetaData?.oi ? {
+        esfera: recetaData.oi.esfera,
+        cilindro: recetaData.oi.cilindro,
+        eje: recetaData.oi.grado,
+        distanciaPupilar: detalles?.dp
+      } : undefined,
+      detallesLentes: detalles ? {
+        cristal: detalles.cristal,
+        codigo: detalles.codigo,
+        color: detalles.color,
+        armazonMarca: detalles.armazonMarca
+      } : undefined,
+      observaciones: type === 'lejos' ? 'Receta Lejos' : 'Receta Cerca'
+    };
+
+    this.isLoading = true;
+    this.prescriptionsService.create(prescriptionData).subscribe({
+      next: (prescription) => {
+        this.isLoading = false;
+        this.successMessage = `Receta ${type === 'lejos' ? 'Lejos' : 'Cerca'} guardada exitosamente`;
+        this.formData.recetaId = prescription._id;
+        if (type === 'lejos') {
+          this.selectedPrescriptionLejos = prescription;
+        } else {
+          this.selectedPrescriptionCerca = prescription;
+        }
+        this.loadClientPrescriptions(this.formData.cliente.rut);
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessage = error.error?.message || 'Error al guardar la receta';
+      }
+    });
   }
 
   selectExistingPrescription(prescription: Prescription): void {
