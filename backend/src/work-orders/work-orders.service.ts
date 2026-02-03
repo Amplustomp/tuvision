@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { WorkOrder, WorkOrderDocument } from './schemas/work-order.schema';
 import { CreateWorkOrderDto, UpdateWorkOrderDto } from './dto';
 
@@ -108,7 +108,7 @@ export class WorkOrdersService {
 
   async findByClientId(clienteId: string): Promise<WorkOrderDocument[]> {
     return this.workOrderModel
-      .find({ clienteId })
+      .find({ clienteId: new Types.ObjectId(clienteId) } as any)
       .populate('clienteId', 'nombre rut telefono email')
       .populate('recetaLejosId')
       .populate('recetaCercaId')
