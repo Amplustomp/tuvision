@@ -53,6 +53,10 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     selectedPrescriptionCerca: Prescription | null = null;
     showPrescriptionModal = false;
     prescriptionType: 'lejos' | 'cerca' = 'lejos';
+    
+    savingClient = false;
+    clientSaveMessage = '';
+    clientSaveError = '';
 
     private subscription = new Subscription();
     private workOrdersService = inject(WorkOrdersService);
@@ -430,6 +434,41 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
       this.selectedClient = null;
       this.clientSearchTerm = '';
     }
+    this.clientSaveMessage = '';
+    this.clientSaveError = '';
+  }
+
+  saveNewClient(): void {
+    if (!this.formData.cliente.nombre || !this.formData.cliente.rut) {
+      this.clientSaveError = 'Nombre y RUT son obligatorios';
+      return;
+    }
+
+    this.savingClient = true;
+    this.clientSaveMessage = '';
+    this.clientSaveError = '';
+
+    const clientData = {
+      nombre: this.formData.cliente.nombre,
+      rut: this.formData.cliente.rut,
+      telefono: this.formData.cliente.telefono || '',
+      email: this.formData.cliente.email || ''
+    };
+
+    this.clientsService.create(clientData).subscribe({
+      next: (savedClient) => {
+        this.savingClient = false;
+        this.clientSaveMessage = 'Cliente guardado exitosamente';
+        this.selectedClient = savedClient;
+        this.isNewClient = false;
+        this.loadClients();
+        this.loadClientPrescriptions(savedClient.rut);
+      },
+      error: (error) => {
+        this.savingClient = false;
+        this.clientSaveError = error.error?.message || 'Error al guardar el cliente';
+      }
+    });
   }
 
   loadClientPrescriptions(rut: string): void {
