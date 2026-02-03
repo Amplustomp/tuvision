@@ -87,6 +87,9 @@ export class CustomerData {
 
   @Prop()
   telefono: string;
+
+  @Prop()
+  email: string;
 }
 
 const CustomerDataSchema = SchemaFactory.createForClass(CustomerData);
