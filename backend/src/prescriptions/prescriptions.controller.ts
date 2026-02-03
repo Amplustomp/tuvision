@@ -37,7 +37,7 @@ export class PrescriptionsController {
   @ApiResponse({ status: 401, description: 'No autorizado' })
   create(
     @Body() createPrescriptionDto: CreatePrescriptionDto,
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('userId') userId: string,
   ) {
     return this.prescriptionsService.create(createPrescriptionDto, userId);
   }
@@ -114,7 +114,7 @@ export class PrescriptionsController {
   update(
     @Param('id') id: string,
     @Body() updatePrescriptionDto: UpdatePrescriptionDto,
-    @CurrentUser('_id') userId: string,
+    @CurrentUser('userId') userId: string,
   ) {
     return this.prescriptionsService.update(id, updatePrescriptionDto, userId);
   }

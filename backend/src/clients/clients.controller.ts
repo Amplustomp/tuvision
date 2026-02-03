@@ -23,7 +23,12 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Role } from '../common/enums';
-import { User } from '../users/schemas/user.schema';
+
+interface AuthenticatedUser {
+  userId: string;
+  email: string;
+  role: string;
+}
 
 @ApiTags('Clientes')
 @ApiBearerAuth()
@@ -39,7 +44,7 @@ export class ClientsController {
     status: 409,
     description: 'Ya existe un cliente con este RUT',
   })
-  create(@Body() createClientDto: CreateClientDto, @CurrentUser() user: User) {
+  create(@Body() createClientDto: CreateClientDto, @CurrentUser() user: AuthenticatedUser) {
     return this.clientsService.create(createClientDto, user);
   }
 
@@ -88,7 +93,7 @@ export class ClientsController {
   update(
     @Param('id') id: string,
     @Body() updateClientDto: UpdateClientDto,
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.clientsService.update(id, updateClientDto, user);
   }
@@ -107,7 +112,7 @@ export class ClientsController {
   @ApiResponse({ status: 200, description: 'Cliente encontrado o creado' })
   findOrCreate(
     @Body() createClientDto: CreateClientDto,
-    @CurrentUser() user: User,
+    @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.clientsService.findOrCreate(createClientDto, user);
   }
