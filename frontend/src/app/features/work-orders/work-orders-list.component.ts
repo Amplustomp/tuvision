@@ -58,6 +58,23 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     clientSaveMessage = '';
     clientSaveError = '';
 
+    showPrescriptionFormModal = false;
+    prescriptionFormType: 'lejos' | 'cerca' = 'lejos';
+    showExistingPrescriptionsList = false;
+    savingPrescription = false;
+    prescriptionSaveMessage = '';
+    prescriptionSaveError = '';
+    prescriptionFormData = {
+      od: { esfera: '', cilindro: '', grado: '' },
+      oi: { esfera: '', cilindro: '', grado: '' },
+      add: '',
+      dp: '',
+      cristal: '',
+      codigo: '',
+      color: '',
+      armazonMarca: ''
+    };
+
     private subscription = new Subscription();
     private workOrdersService = inject(WorkOrdersService);
     private authService = inject(AuthService);
@@ -552,72 +569,144 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
   }
 
   selectExistingPrescription(prescription: Prescription): void {
-    if (this.prescriptionType === 'lejos') {
+    if (this.prescriptionFormType === 'lejos') {
       this.selectedPrescriptionLejos = prescription;
-      if (prescription.ojoDerecho || prescription.ojoIzquierdo) {
-        this.formData.receta = this.formData.receta || { lejos: { od: {}, oi: {} }, cerca: { od: {}, oi: {} }, add: '', detallesLejos: { dp: '', cristal: '', codigo: '', color: '', armazonMarca: '' }, detallesCerca: { dp: '', cristal: '', codigo: '', color: '', armazonMarca: '' } };
-        if (prescription.ojoDerecho) {
-          this.formData.receta.lejos = this.formData.receta.lejos || { od: {}, oi: {} };
-          this.formData.receta.lejos.od = {
-            esfera: prescription.ojoDerecho.esfera,
-            cilindro: prescription.ojoDerecho.cilindro,
-            grado: prescription.ojoDerecho.eje
-          };
-        }
-        if (prescription.ojoIzquierdo) {
-          this.formData.receta.lejos = this.formData.receta.lejos || { od: {}, oi: {} };
-          this.formData.receta.lejos.oi = {
-            esfera: prescription.ojoIzquierdo.esfera,
-            cilindro: prescription.ojoIzquierdo.cilindro,
-            grado: prescription.ojoIzquierdo.eje
-          };
-        }
-        if (prescription.detallesLentes) {
-          this.formData.receta.detallesLejos = {
-            dp: prescription.ojoIzquierdo?.distanciaPupilar || '',
-            cristal: prescription.detallesLentes.cristal || '',
-            codigo: prescription.detallesLentes.codigo || '',
-            color: prescription.detallesLentes.color || '',
-            armazonMarca: prescription.detallesLentes.armazonMarca || ''
-          };
-        }
-      }
+      this.prescriptionFormData.od = {
+        esfera: prescription.ojoDerecho?.esfera || '',
+        cilindro: prescription.ojoDerecho?.cilindro || '',
+        grado: prescription.ojoDerecho?.eje || ''
+      };
+      this.prescriptionFormData.oi = {
+        esfera: prescription.ojoIzquierdo?.esfera || '',
+        cilindro: prescription.ojoIzquierdo?.cilindro || '',
+        grado: prescription.ojoIzquierdo?.eje || ''
+      };
+      this.prescriptionFormData.dp = prescription.ojoDerecho?.distanciaPupilar || '';
+      this.prescriptionFormData.cristal = prescription.detallesLentes?.cristal || '';
+      this.prescriptionFormData.codigo = prescription.detallesLentes?.codigo || '';
+      this.prescriptionFormData.color = prescription.detallesLentes?.color || '';
+      this.prescriptionFormData.armazonMarca = prescription.detallesLentes?.armazonMarca || '';
     } else {
       this.selectedPrescriptionCerca = prescription;
-      if (prescription.ojoDerecho || prescription.ojoIzquierdo) {
-        this.formData.receta = this.formData.receta || { lejos: { od: {}, oi: {} }, cerca: { od: {}, oi: {} }, add: '', detallesLejos: { dp: '', cristal: '', codigo: '', color: '', armazonMarca: '' }, detallesCerca: { dp: '', cristal: '', codigo: '', color: '', armazonMarca: '' } };
-        if (prescription.ojoDerecho) {
-          this.formData.receta.cerca = this.formData.receta.cerca || { od: {}, oi: {} };
-          this.formData.receta.cerca.od = {
-            esfera: prescription.ojoDerecho.esfera,
-            cilindro: prescription.ojoDerecho.cilindro,
-            grado: prescription.ojoDerecho.eje
-          };
-        }
-        if (prescription.ojoIzquierdo) {
-          this.formData.receta.cerca = this.formData.receta.cerca || { od: {}, oi: {} };
-          this.formData.receta.cerca.oi = {
-            esfera: prescription.ojoIzquierdo.esfera,
-            cilindro: prescription.ojoIzquierdo.cilindro,
-            grado: prescription.ojoIzquierdo.eje
-          };
-        }
-        if (prescription.detallesLentes) {
-          this.formData.receta.detallesCerca = {
-            dp: prescription.ojoIzquierdo?.distanciaPupilar || '',
-            cristal: prescription.detallesLentes.cristal || '',
-            codigo: prescription.detallesLentes.codigo || '',
-            color: prescription.detallesLentes.color || '',
-            armazonMarca: prescription.detallesLentes.armazonMarca || ''
-          };
-        }
-        if (prescription.ojoDerecho?.adicion) {
-          this.formData.receta.add = prescription.ojoDerecho.adicion;
-        }
-      }
+      this.prescriptionFormData.od = {
+        esfera: prescription.ojoDerecho?.esfera || '',
+        cilindro: prescription.ojoDerecho?.cilindro || '',
+        grado: prescription.ojoDerecho?.eje || ''
+      };
+      this.prescriptionFormData.oi = {
+        esfera: prescription.ojoIzquierdo?.esfera || '',
+        cilindro: prescription.ojoIzquierdo?.cilindro || '',
+        grado: prescription.ojoIzquierdo?.eje || ''
+      };
+      this.prescriptionFormData.add = prescription.ojoDerecho?.adicion || '';
+      this.prescriptionFormData.dp = prescription.ojoIzquierdo?.distanciaPupilar || '';
+      this.prescriptionFormData.cristal = prescription.detallesLentes?.cristal || '';
+      this.prescriptionFormData.codigo = prescription.detallesLentes?.codigo || '';
+      this.prescriptionFormData.color = prescription.detallesLentes?.color || '';
+      this.prescriptionFormData.armazonMarca = prescription.detallesLentes?.armazonMarca || '';
     }
     this.formData.recetaId = prescription._id;
-    this.closePrescriptionModal();
+    this.showExistingPrescriptionsList = false;
+    this.prescriptionSaveMessage = 'Receta cargada exitosamente';
+  }
+
+  openPrescriptionFormModal(type: 'lejos' | 'cerca'): void {
+    this.prescriptionFormType = type;
+    this.showPrescriptionFormModal = true;
+    this.showExistingPrescriptionsList = false;
+    this.prescriptionSaveMessage = '';
+    this.prescriptionSaveError = '';
+    this.resetPrescriptionFormData();
+    
+    if (this.formData.cliente.rut) {
+      this.loadClientPrescriptions(this.formData.cliente.rut);
+    }
+  }
+
+  closePrescriptionFormModal(): void {
+    this.showPrescriptionFormModal = false;
+    this.showExistingPrescriptionsList = false;
+  }
+
+  resetPrescriptionFormData(): void {
+    this.prescriptionFormData = {
+      od: { esfera: '', cilindro: '', grado: '' },
+      oi: { esfera: '', cilindro: '', grado: '' },
+      add: '',
+      dp: '',
+      cristal: '',
+      codigo: '',
+      color: '',
+      armazonMarca: ''
+    };
+  }
+
+  showExistingPrescriptions(): void {
+    this.showExistingPrescriptionsList = true;
+  }
+
+  hideExistingPrescriptions(): void {
+    this.showExistingPrescriptionsList = false;
+  }
+
+  savePrescriptionFromModal(): void {
+    if (!this.formData.cliente.rut || !this.formData.cliente.nombre) {
+      this.prescriptionSaveError = 'Debe ingresar los datos del cliente primero';
+      return;
+    }
+
+    if (!this.prescriptionFormData.od.esfera && !this.prescriptionFormData.oi.esfera) {
+      this.prescriptionSaveError = 'Debe ingresar al menos los datos de esfera para guardar la receta';
+      return;
+    }
+
+    const prescriptionData: CreatePrescriptionDto = {
+      clienteRut: this.formData.cliente.rut,
+      clienteNombre: this.formData.cliente.nombre,
+      clienteTelefono: this.formData.cliente.telefono,
+      ojoDerecho: this.prescriptionFormData.od.esfera ? {
+        esfera: this.prescriptionFormData.od.esfera,
+        cilindro: this.prescriptionFormData.od.cilindro,
+        eje: this.prescriptionFormData.od.grado,
+        distanciaPupilar: this.prescriptionFormData.dp,
+        adicion: this.prescriptionFormType === 'cerca' ? this.prescriptionFormData.add : undefined
+      } : undefined,
+      ojoIzquierdo: this.prescriptionFormData.oi.esfera ? {
+        esfera: this.prescriptionFormData.oi.esfera,
+        cilindro: this.prescriptionFormData.oi.cilindro,
+        eje: this.prescriptionFormData.oi.grado,
+        distanciaPupilar: this.prescriptionFormData.dp
+      } : undefined,
+      detallesLentes: {
+        cristal: this.prescriptionFormData.cristal,
+        codigo: this.prescriptionFormData.codigo,
+        color: this.prescriptionFormData.color,
+        armazonMarca: this.prescriptionFormData.armazonMarca
+      },
+      observaciones: this.prescriptionFormType === 'lejos' ? 'Receta Lejos' : 'Receta Cerca'
+    };
+
+    this.savingPrescription = true;
+    this.prescriptionSaveMessage = '';
+    this.prescriptionSaveError = '';
+
+    this.prescriptionsService.create(prescriptionData).subscribe({
+      next: (prescription) => {
+        this.savingPrescription = false;
+        this.prescriptionSaveMessage = `Receta ${this.prescriptionFormType === 'lejos' ? 'Lejos' : 'Cerca'} guardada exitosamente`;
+        this.formData.recetaId = prescription._id;
+        if (this.prescriptionFormType === 'lejos') {
+          this.selectedPrescriptionLejos = prescription;
+        } else {
+          this.selectedPrescriptionCerca = prescription;
+        }
+        this.loadClientPrescriptions(this.formData.cliente.rut);
+      },
+      error: (error) => {
+        this.savingPrescription = false;
+        this.prescriptionSaveError = error.error?.message || 'Error al guardar la receta';
+      }
+    });
   }
 
   getDisplayOrderNumber(order: WorkOrder): string {
