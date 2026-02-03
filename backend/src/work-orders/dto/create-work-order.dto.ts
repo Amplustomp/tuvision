@@ -147,6 +147,14 @@ class CustomerDataDto {
   @IsString()
   @IsOptional()
   telefono?: string;
+
+  @ApiPropertyOptional({
+    description: 'Email del cliente',
+    example: 'cliente@ejemplo.com',
+  })
+  @IsString()
+  @IsOptional()
+  email?: string;
 }
 
 class PurchaseDataDto {
