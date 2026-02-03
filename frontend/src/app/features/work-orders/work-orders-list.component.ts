@@ -536,6 +536,30 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     });
   }
 
+  loadFilteredPrescriptions(rut: string, type: 'lejos' | 'cerca'): void {
+    if (!rut) return;
+    
+    if (type === 'lejos') {
+      this.prescriptionsService.getByClientRutAndType(rut, 'lejos').subscribe({
+        next: (prescriptions) => {
+          this.clientPrescriptions = prescriptions;
+        },
+        error: () => {
+          this.clientPrescriptions = [];
+        }
+      });
+    } else {
+      this.prescriptionsService.getByClientRut(rut).subscribe({
+        next: (prescriptions) => {
+          this.clientPrescriptions = prescriptions;
+        },
+        error: () => {
+          this.clientPrescriptions = [];
+        }
+      });
+    }
+  }
+
   openPrescriptionModal(type: 'lejos' | 'cerca'): void {
     this.prescriptionType = type;
     this.showPrescriptionModal = true;
@@ -644,7 +668,7 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     this.resetPrescriptionFormData();
     
     if (this.clienteFormData.rut) {
-      this.loadClientPrescriptions(this.clienteFormData.rut);
+      this.loadFilteredPrescriptions(this.clienteFormData.rut, type);
     }
   }
 
