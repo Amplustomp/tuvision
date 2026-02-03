@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { WorkOrder, CreateWorkOrderDto, UpdateWorkOrderDto } from '../models';
@@ -23,9 +23,8 @@ export class WorkOrdersService {
     return this.http.get<WorkOrder>(`${this.API_URL}/by-number/${numeroOrden}`);
   }
 
-  getByCustomerRut(rut: string): Observable<WorkOrder[]> {
-    const params = new HttpParams().set('rut', rut);
-    return this.http.get<WorkOrder[]>(`${this.API_URL}/by-rut`, { params });
+  getByClientId(clienteId: string): Observable<WorkOrder[]> {
+    return this.http.get<WorkOrder[]>(`${this.API_URL}/by-client/${clienteId}`);
   }
 
   create(workOrder: CreateWorkOrderDto): Observable<WorkOrder> {

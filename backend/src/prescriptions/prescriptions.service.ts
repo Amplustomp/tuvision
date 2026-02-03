@@ -4,8 +4,15 @@ import { Model } from 'mongoose';
 import {
   Prescription,
   PrescriptionDocument,
+  EyeData,
 } from './schemas/prescription.schema';
 import { CreatePrescriptionDto, UpdatePrescriptionDto } from './dto';
+
+export interface CreatePrescriptionResult {
+  prescription: PrescriptionDocument;
+  isNew: boolean;
+  message?: string;
+}
 
 @Injectable()
 export class PrescriptionsService {
@@ -14,15 +21,82 @@ export class PrescriptionsService {
     private prescriptionModel: Model<PrescriptionDocument>,
   ) {}
 
+  private areEyeDataEqual(eye1?: EyeData, eye2?: EyeData): boolean {
+    if (!eye1 && !eye2) return true;
+    if (!eye1 || !eye2) return false;
+    return (
+      (eye1.esfera || '') === (eye2.esfera || '') &&
+      (eye1.cilindro || '') === (eye2.cilindro || '') &&
+      (eye1.eje || '') === (eye2.eje || '') &&
+      (eye1.adicion || '') === (eye2.adicion || '')
+    );
+  }
+
+  private arePrescriptionValuesEqual(
+    newPrescription: CreatePrescriptionDto,
+    existingPrescription: PrescriptionDocument,
+  ): boolean {
+    const odEqual = this.areEyeDataEqual(
+      newPrescription.ojoDerecho as EyeData,
+      existingPrescription.ojoDerecho,
+    );
+    const oiEqual = this.areEyeDataEqual(
+      newPrescription.ojoIzquierdo as EyeData,
+      existingPrescription.ojoIzquierdo,
+    );
+    const dpEqual =
+      (newPrescription.distanciaPupilar || '') ===
+      (existingPrescription.distanciaPupilar || '');
+
+    return odEqual && oiEqual && dpEqual;
+  }
+
   async create(
     createPrescriptionDto: CreatePrescriptionDto,
     userId: string,
-  ): Promise<PrescriptionDocument> {
+  ): Promise<CreatePrescriptionResult> {
+    const latestPrescription = await this.findLatestByClientRutAndType(
+      createPrescriptionDto.clienteRut,
+      createPrescriptionDto.tipo,
+    );
+
+    if (
+      latestPrescription &&
+      this.arePrescriptionValuesEqual(createPrescriptionDto, latestPrescription)
+    ) {
+      const updatedPrescription = await this.prescriptionModel
+        .findByIdAndUpdate(
+          latestPrescription._id,
+          { actualizadoPor: userId },
+          { new: true, timestamps: true },
+        )
+        .populate('creadoPor', 'nombre email')
+        .populate('actualizadoPor', 'nombre email')
+        .exec();
+
+      return {
+        prescription: updatedPrescription!,
+        isNew: false,
+        message:
+          'La receta no presenta cambios respecto a la ultima conocida. Se actualizo la fecha.',
+      };
+    }
+
     const createdPrescription = new this.prescriptionModel({
       ...createPrescriptionDto,
       creadoPor: userId,
     });
-    return createdPrescription.save();
+    const savedPrescription = await createdPrescription.save();
+    const populatedPrescription = await this.prescriptionModel
+      .findById(savedPrescription._id)
+      .populate('creadoPor', 'nombre email')
+      .populate('actualizadoPor', 'nombre email')
+      .exec();
+
+    return {
+      prescription: populatedPrescription!,
+      isNew: true,
+    };
   }
 
   async findAll(): Promise<PrescriptionDocument[]> {
@@ -60,6 +134,30 @@ export class PrescriptionsService {
   ): Promise<PrescriptionDocument | null> {
     return this.prescriptionModel
       .findOne({ clienteRut: rut })
+      .populate('creadoPor', 'nombre email')
+      .populate('actualizadoPor', 'nombre email')
+      .sort({ createdAt: -1 })
+      .exec();
+  }
+
+  async findLatestByClientRutAndType(
+    rut: string,
+    tipo: string,
+  ): Promise<PrescriptionDocument | null> {
+    return this.prescriptionModel
+      .findOne({ clienteRut: rut, tipo })
+      .populate('creadoPor', 'nombre email')
+      .populate('actualizadoPor', 'nombre email')
+      .sort({ createdAt: -1 })
+      .exec();
+  }
+
+  async findByClientRutAndType(
+    rut: string,
+    tipo: string,
+  ): Promise<PrescriptionDocument[]> {
+    return this.prescriptionModel
+      .find({ clienteRut: rut, tipo })
       .populate('creadoPor', 'nombre email')
       .populate('actualizadoPor', 'nombre email')
       .sort({ createdAt: -1 })

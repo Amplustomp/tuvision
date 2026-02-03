@@ -1,16 +1,10 @@
+export type PrescriptionType = 'lejos' | 'cerca';
+
 export interface EyeData {
   esfera?: string;
   cilindro?: string;
   eje?: string;
   adicion?: string;
-  distanciaPupilar?: string;
-}
-
-export interface LensDetails {
-  cristal?: string;
-  codigo?: string;
-  color?: string;
-  armazonMarca?: string;
 }
 
 export interface Prescription {
@@ -18,9 +12,10 @@ export interface Prescription {
   clienteRut: string;
   clienteNombre: string;
   clienteTelefono?: string;
+  tipo: PrescriptionType;
   ojoDerecho?: EyeData;
   ojoIzquierdo?: EyeData;
-  detallesLentes?: LensDetails;
+  distanciaPupilar?: string;
   observaciones?: string;
   creadoPor: {
     _id: string;
@@ -40,10 +35,17 @@ export interface CreatePrescriptionDto {
   clienteRut: string;
   clienteNombre: string;
   clienteTelefono?: string;
+  tipo: PrescriptionType;
   ojoDerecho?: EyeData;
   ojoIzquierdo?: EyeData;
-  detallesLentes?: LensDetails;
+  distanciaPupilar?: string;
   observaciones?: string;
+}
+
+export interface CreatePrescriptionResult {
+  prescription: Prescription;
+  isNew: boolean;
+  message?: string;
 }
 
 export type UpdatePrescriptionDto = Partial<CreatePrescriptionDto>;

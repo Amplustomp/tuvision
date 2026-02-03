@@ -7,6 +7,7 @@ import {
 } from '../../common/enums';
 import { User } from '../../users/schemas/user.schema';
 import { Prescription } from '../../prescriptions/schemas/prescription.schema';
+import { Client } from '../../clients/schemas/client.schema';
 
 export type WorkOrderDocument = HydratedDocument<WorkOrder>;
 
@@ -78,23 +79,6 @@ const MedicalPrescriptionSchema =
   SchemaFactory.createForClass(MedicalPrescription);
 
 @Schema()
-export class CustomerData {
-  @Prop({ required: true })
-  nombre: string;
-
-  @Prop({ required: true })
-  rut: string;
-
-  @Prop()
-  telefono: string;
-
-  @Prop()
-  email: string;
-}
-
-const CustomerDataSchema = SchemaFactory.createForClass(CustomerData);
-
-@Schema()
 export class PurchaseData {
   @Prop({ required: true })
   totalVenta: number;
@@ -128,11 +112,14 @@ export class WorkOrder {
   @Prop({ type: String, enum: WorkOrderType, required: true })
   tipoOrden: WorkOrderType;
 
-  @Prop({ type: CustomerDataSchema, required: true })
-  cliente: CustomerData;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Client', required: true })
+  clienteId: Client;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Prescription' })
-  recetaId: Prescription;
+  recetaLejosId: Prescription;
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Prescription' })
+  recetaCercaId: Prescription;
 
   @Prop({ type: MedicalPrescriptionSchema })
   receta: MedicalPrescription;

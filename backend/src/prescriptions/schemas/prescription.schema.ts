@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { User } from '../../users/schemas/user.schema';
+import { PrescriptionType } from '../../common/enums';
 
 export type PrescriptionDocument = HydratedDocument<Prescription>;
 
@@ -17,29 +18,9 @@ export class EyeData {
 
   @Prop()
   adicion: string;
-
-  @Prop()
-  distanciaPupilar: string;
 }
 
 const EyeDataSchema = SchemaFactory.createForClass(EyeData);
-
-@Schema()
-export class LensDetails {
-  @Prop()
-  cristal: string;
-
-  @Prop()
-  codigo: string;
-
-  @Prop()
-  color: string;
-
-  @Prop()
-  armazonMarca: string;
-}
-
-const LensDetailsSchema = SchemaFactory.createForClass(LensDetails);
 
 @Schema({ timestamps: true })
 export class Prescription {
@@ -52,14 +33,17 @@ export class Prescription {
   @Prop()
   clienteTelefono: string;
 
+  @Prop({ type: String, enum: PrescriptionType, required: true })
+  tipo: PrescriptionType;
+
   @Prop({ type: EyeDataSchema })
   ojoDerecho: EyeData;
 
   @Prop({ type: EyeDataSchema })
   ojoIzquierdo: EyeData;
 
-  @Prop({ type: LensDetailsSchema })
-  detallesLentes: LensDetails;
+  @Prop()
+  distanciaPupilar: string;
 
   @Prop()
   observaciones: string;
@@ -74,4 +58,5 @@ export class Prescription {
 export const PrescriptionSchema = SchemaFactory.createForClass(Prescription);
 
 PrescriptionSchema.index({ clienteRut: 1 });
+PrescriptionSchema.index({ clienteRut: 1, tipo: 1 });
 PrescriptionSchema.index({ createdAt: -1 });

@@ -134,7 +134,7 @@ Todos los endpoints de usuarios requieren autenticación y rol de administrador.
 | GET | /work-orders | Lista todas las órdenes | Autenticado |
 | GET | /work-orders/:id | Obtiene una orden por ID | Autenticado |
 | GET | /work-orders/by-number/:numeroOrden | Obtiene orden por número | Autenticado |
-| GET | /work-orders/by-rut?rut=XX | Busca órdenes por RUT del cliente | Autenticado |
+| GET | /work-orders/by-client/:clienteId | Busca órdenes por ID del cliente | Autenticado |
 | POST | /work-orders | Crea una nueva orden | Autenticado |
 | PATCH | /work-orders/:id | Actualiza una orden | Admin |
 | DELETE | /work-orders/:id | Elimina una orden | Admin |
@@ -144,11 +144,10 @@ Todos los endpoints de usuarios requieren autenticación y rol de administrador.
 ```json
 {
   "tipoOrden": "lente_completo",
-  "cliente": {
-    "nombre": "Juan Pérez",
-    "rut": "12.345.678-9",
-    "telefono": "+56912345678"
-  },
+  "tipoNumeroOrden": "tu_vision",
+  "clienteId": "507f1f77bcf86cd799439011",
+  "recetaLejosId": "507f1f77bcf86cd799439012",
+  "recetaCercaId": "507f1f77bcf86cd799439013",
   "receta": {
     "lejos": {
       "od": { "esfera": "-2.00", "cilindro": "-0.50", "grado": "180" },
@@ -185,6 +184,12 @@ Todos los endpoints de usuarios requieren autenticación y rol de administrador.
   "observaciones": "Cliente prefiere entrega en la tarde"
 }
 ```
+
+### Cambios en el Modelo de Orden de Trabajo
+
+El campo `cliente` ha sido reemplazado por `clienteId`, que es una referencia al documento del cliente en la colección de clientes. Esto evita la duplicación de datos y mantiene la consistencia.
+
+El campo `recetaId` ha sido reemplazado por `recetaLejosId` y `recetaCercaId` para permitir vincular recetas de lejos y cerca de forma independiente.
 
 ### Formas de Pago
 
@@ -260,14 +265,25 @@ El sistema implementa dos mecanismos de seguridad para la gestión de sesiones:
 
 ## Recetas Médicas
 
+### Tipos de Receta
+
+Las recetas médicas ahora tienen un campo `tipo` obligatorio que indica si es una receta para lejos o cerca:
+
+| Tipo | Descripción |
+|------|-------------|
+| **lejos** | Receta para visión de lejos |
+| **cerca** | Receta para visión de cerca |
+
 ### Endpoints
 
 | Método | Endpoint | Descripción | Rol Requerido |
 |--------|----------|-------------|---------------|
 | GET | /prescriptions | Lista todas las recetas (ordenadas por fecha, más reciente primero) | Autenticado |
 | GET | /prescriptions/:id | Obtiene una receta por ID | Autenticado |
-| GET | /prescriptions/by-rut/:rut | Busca recetas por RUT del cliente | Autenticado |
-| GET | /prescriptions/latest/:rut | Obtiene la última receta del cliente | Autenticado |
+| GET | /prescriptions/by-rut?rut=XX | Busca recetas por RUT del cliente | Autenticado |
+| GET | /prescriptions/latest-by-rut?rut=XX | Obtiene la última receta del cliente | Autenticado |
+| GET | /prescriptions/by-rut-and-type?rut=XX&tipo=YY | Busca recetas por RUT y tipo | Autenticado |
+| GET | /prescriptions/latest-by-rut-and-type?rut=XX&tipo=YY | Obtiene la última receta por RUT y tipo | Autenticado |
 | POST | /prescriptions | Crea una nueva receta | Autenticado |
 | PATCH | /prescriptions/:id | Actualiza una receta | Admin |
 | DELETE | /prescriptions/:id | Elimina una receta | Admin |
@@ -278,27 +294,21 @@ El sistema implementa dos mecanismos de seguridad para la gestión de sesiones:
 {
   "clienteRut": "12.345.678-9",
   "clienteNombre": "Juan Pérez",
-  "fecha": "2026-02-01",
-  "od": {
+  "clienteTelefono": "+56912345678",
+  "tipo": "lejos",
+  "ojoDerecho": {
     "esfera": "-2.00",
     "cilindro": "-0.50",
     "eje": "180",
-    "adicion": "+2.00",
-    "distanciaPupilar": "32"
+    "adicion": "+2.00"
   },
-  "oi": {
+  "ojoIzquierdo": {
     "esfera": "-1.75",
     "cilindro": "-0.25",
     "eje": "175",
-    "adicion": "+2.00",
-    "distanciaPupilar": "31"
+    "adicion": "+2.00"
   },
-  "detallesLentes": {
-    "cristal": "Policarbonato",
-    "codigo": "PC-001",
-    "color": "Transparente",
-    "armazonMarca": "Ray-Ban RB5154"
-  },
+  "distanciaPupilar": "63",
   "observaciones": "Cliente prefiere lentes fotocromáticos"
 }
 ```
@@ -306,6 +316,29 @@ El sistema implementa dos mecanismos de seguridad para la gestión de sesiones:
 ### Campos de Receta
 
 Los valores de la receta (esfera, cilindro, eje, adición, distancia pupilar) son strings para soportar números negativos y decimales.
+
+El campo `distanciaPupilar` es único por receta (no se replica por ojo).
+
+### Validación de Duplicidad
+
+Al crear una nueva receta, el sistema verifica si ya existe una receta con los mismos valores para el mismo cliente y tipo. Si los valores son idénticos a la última receta conocida, no se crea una nueva receta, sino que se actualiza la fecha de la receta existente. El response incluye:
+
+```json
+{
+  "prescription": { ... },
+  "isNew": false,
+  "message": "La receta no presenta cambios respecto a la ultima conocida. Se actualizo la fecha."
+}
+```
+
+Si la receta es nueva (valores diferentes), el response será:
+
+```json
+{
+  "prescription": { ... },
+  "isNew": true
+}
+```
 
 ## Tipos de Número de Orden
 

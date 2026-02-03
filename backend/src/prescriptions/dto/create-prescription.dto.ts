@@ -1,4 +1,5 @@
 import {
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -6,6 +7,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { PrescriptionType } from '../../common/enums';
 
 class EyeDataDto {
   @ApiPropertyOptional({ description: 'Esfera', example: '-2.50' })
@@ -27,39 +29,6 @@ class EyeDataDto {
   @IsString()
   @IsOptional()
   adicion?: string;
-
-  @ApiPropertyOptional({ description: 'Distancia Pupilar', example: '32' })
-  @IsString()
-  @IsOptional()
-  distanciaPupilar?: string;
-}
-
-class LensDetailsDto {
-  @ApiPropertyOptional({
-    description: 'Tipo de cristal',
-    example: 'Policarbonato',
-  })
-  @IsString()
-  @IsOptional()
-  cristal?: string;
-
-  @ApiPropertyOptional({ description: 'Codigo del cristal', example: 'PC-001' })
-  @IsString()
-  @IsOptional()
-  codigo?: string;
-
-  @ApiPropertyOptional({
-    description: 'Color del cristal',
-    example: 'Transparente',
-  })
-  @IsString()
-  @IsOptional()
-  color?: string;
-
-  @ApiPropertyOptional({ description: 'Marca del armazon', example: 'Ray-Ban' })
-  @IsString()
-  @IsOptional()
-  armazonMarca?: string;
 }
 
 export class CreatePrescriptionDto {
@@ -81,6 +50,15 @@ export class CreatePrescriptionDto {
   @IsOptional()
   clienteTelefono?: string;
 
+  @ApiProperty({
+    description: 'Tipo de receta',
+    enum: PrescriptionType,
+    example: PrescriptionType.LEJOS,
+  })
+  @IsEnum(PrescriptionType)
+  @IsNotEmpty()
+  tipo: PrescriptionType;
+
   @ApiPropertyOptional({
     description: 'Datos del ojo derecho',
     type: EyeDataDto,
@@ -100,13 +78,12 @@ export class CreatePrescriptionDto {
   ojoIzquierdo?: EyeDataDto;
 
   @ApiPropertyOptional({
-    description: 'Detalles de lentes',
-    type: LensDetailsDto,
+    description: 'Distancia Pupilar',
+    example: '63',
   })
-  @ValidateNested()
-  @Type(() => LensDetailsDto)
+  @IsString()
   @IsOptional()
-  detallesLentes?: LensDetailsDto;
+  distanciaPupilar?: string;
 
   @ApiPropertyOptional({
     description: 'Observaciones',

@@ -129,34 +129,6 @@ class MedicalPrescriptionDto {
   detallesCerca?: LensDetailsDto;
 }
 
-class CustomerDataDto {
-  @ApiProperty({ description: 'Nombre del cliente', example: 'Juan Pérez' })
-  @IsString()
-  @IsNotEmpty()
-  nombre: string;
-
-  @ApiProperty({ description: 'RUT del cliente', example: '12.345.678-9' })
-  @IsString()
-  @IsNotEmpty()
-  rut: string;
-
-  @ApiPropertyOptional({
-    description: 'Teléfono del cliente',
-    example: '+56912345678',
-  })
-  @IsString()
-  @IsOptional()
-  telefono?: string;
-
-  @ApiPropertyOptional({
-    description: 'Email del cliente',
-    example: 'cliente@ejemplo.com',
-  })
-  @IsString()
-  @IsOptional()
-  email?: string;
-}
-
 class PurchaseDataDto {
   @ApiProperty({ description: 'Total de la venta', example: 150000 })
   @IsNumber()
@@ -218,19 +190,29 @@ export class CreateWorkOrderDto {
   @IsNotEmpty()
   tipoOrden: WorkOrderType;
 
-  @ApiProperty({ description: 'Datos del cliente', type: CustomerDataDto })
-  @ValidateNested()
-  @Type(() => CustomerDataDto)
+  @ApiProperty({
+    description: 'ID del cliente',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @IsMongoId()
   @IsNotEmpty()
-  cliente: CustomerDataDto;
+  clienteId: string;
 
   @ApiPropertyOptional({
-    description: 'ID de la receta medica asociada',
+    description: 'ID de la receta medica de lejos asociada',
     example: '507f1f77bcf86cd799439011',
   })
   @IsMongoId()
   @IsOptional()
-  recetaId?: string;
+  recetaLejosId?: string;
+
+  @ApiPropertyOptional({
+    description: 'ID de la receta medica de cerca asociada',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @IsMongoId()
+  @IsOptional()
+  recetaCercaId?: string;
 
   @ApiPropertyOptional({
     description: 'Receta medica (opcional para armazon)',
