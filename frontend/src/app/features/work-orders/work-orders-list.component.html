@@ -443,66 +443,68 @@
           </div>
         </div>
 
-        @if (detailWorkOrder.receta) {
+        @if (getRecetaLejos(detailWorkOrder)) {
           <div class="detail-section">
             <h3>Receta - Lejos</h3>
             <div class="receta-detail">
               <div class="receta-eye">
                 <h4>Ojo Derecho (OD)</h4>
                 <div class="receta-values">
-                  <span>ESF: {{ detailWorkOrder.receta.lejos?.od?.esfera ?? '-' }}</span>
-                  <span>CIL: {{ detailWorkOrder.receta.lejos?.od?.cilindro ?? '-' }}</span>
-                  <span>EJE: {{ detailWorkOrder.receta.lejos?.od?.grado ?? '-' }}</span>
+                  <span>ESF: {{ getRecetaLejos(detailWorkOrder)?.ojoDerecho?.esfera ?? '-' }}</span>
+                  <span>CIL: {{ getRecetaLejos(detailWorkOrder)?.ojoDerecho?.cilindro ?? '-' }}</span>
+                  <span>EJE: {{ getRecetaLejos(detailWorkOrder)?.ojoDerecho?.eje ?? '-' }}</span>
                 </div>
               </div>
               <div class="receta-eye">
                 <h4>Ojo Izquierdo (OI)</h4>
                 <div class="receta-values">
-                  <span>ESF: {{ detailWorkOrder.receta.lejos?.oi?.esfera ?? '-' }}</span>
-                  <span>CIL: {{ detailWorkOrder.receta.lejos?.oi?.cilindro ?? '-' }}</span>
-                  <span>EJE: {{ detailWorkOrder.receta.lejos?.oi?.grado ?? '-' }}</span>
+                  <span>ESF: {{ getRecetaLejos(detailWorkOrder)?.ojoIzquierdo?.esfera ?? '-' }}</span>
+                  <span>CIL: {{ getRecetaLejos(detailWorkOrder)?.ojoIzquierdo?.cilindro ?? '-' }}</span>
+                  <span>EJE: {{ getRecetaLejos(detailWorkOrder)?.ojoIzquierdo?.eje ?? '-' }}</span>
                 </div>
               </div>
             </div>
-            @if (detailWorkOrder.receta.detallesLejos) {
-              <div class="lens-details">
-                <span>DP: {{ detailWorkOrder.receta.detallesLejos.dp ?? '-' }}</span>
-                <span>Cristal: {{ detailWorkOrder.receta.detallesLejos.cristal ?? '-' }}</span>
-                <span>Codigo: {{ detailWorkOrder.receta.detallesLejos.codigo ?? '-' }}</span>
-                <span>Color: {{ detailWorkOrder.receta.detallesLejos.color ?? '-' }}</span>
-                <span>Armazon: {{ detailWorkOrder.receta.detallesLejos.armazonMarca ?? '-' }}</span>
-              </div>
-            }
+            <div class="lens-details">
+              <span>DP: {{ getRecetaLejos(detailWorkOrder)?.distanciaPupilar ?? '-' }}</span>
+              @if (detailWorkOrder.receta?.detallesLejos) {
+                <span>Cristal: {{ detailWorkOrder.receta?.detallesLejos?.cristal ?? '-' }}</span>
+                <span>Codigo: {{ detailWorkOrder.receta?.detallesLejos?.codigo ?? '-' }}</span>
+                <span>Color: {{ detailWorkOrder.receta?.detallesLejos?.color ?? '-' }}</span>
+                <span>Armazon: {{ detailWorkOrder.receta?.detallesLejos?.armazonMarca ?? '-' }}</span>
+              }
+            </div>
           </div>
+        }
 
+        @if (getRecetaCerca(detailWorkOrder)) {
           <div class="detail-section">
             <h3>Receta - Cerca</h3>
             <div class="receta-detail">
               <div class="receta-eye">
                 <h4>Ojo Derecho (OD)</h4>
                 <div class="receta-values">
-                  <span>ESF: {{ detailWorkOrder.receta.cerca?.od?.esfera ?? '-' }}</span>
-                  <span>CIL: {{ detailWorkOrder.receta.cerca?.od?.cilindro ?? '-' }}</span>
-                  <span>EJE: {{ detailWorkOrder.receta.cerca?.od?.grado ?? '-' }}</span>
+                  <span>ESF: {{ getRecetaCerca(detailWorkOrder)?.ojoDerecho?.esfera ?? '-' }}</span>
+                  <span>CIL: {{ getRecetaCerca(detailWorkOrder)?.ojoDerecho?.cilindro ?? '-' }}</span>
+                  <span>EJE: {{ getRecetaCerca(detailWorkOrder)?.ojoDerecho?.eje ?? '-' }}</span>
                 </div>
               </div>
               <div class="receta-eye">
                 <h4>Ojo Izquierdo (OI)</h4>
                 <div class="receta-values">
-                  <span>ESF: {{ detailWorkOrder.receta.cerca?.oi?.esfera ?? '-' }}</span>
-                  <span>CIL: {{ detailWorkOrder.receta.cerca?.oi?.cilindro ?? '-' }}</span>
-                  <span>EJE: {{ detailWorkOrder.receta.cerca?.oi?.grado ?? '-' }}</span>
+                  <span>ESF: {{ getRecetaCerca(detailWorkOrder)?.ojoIzquierdo?.esfera ?? '-' }}</span>
+                  <span>CIL: {{ getRecetaCerca(detailWorkOrder)?.ojoIzquierdo?.cilindro ?? '-' }}</span>
+                  <span>EJE: {{ getRecetaCerca(detailWorkOrder)?.ojoIzquierdo?.eje ?? '-' }}</span>
                 </div>
               </div>
             </div>
             <div class="lens-details">
-              <span>ADD: {{ detailWorkOrder.receta.add ?? '-' }}</span>
-              @if (detailWorkOrder.receta.detallesCerca) {
-                <span>DP: {{ detailWorkOrder.receta.detallesCerca.dp ?? '-' }}</span>
-                <span>Cristal: {{ detailWorkOrder.receta.detallesCerca.cristal ?? '-' }}</span>
-                <span>Codigo: {{ detailWorkOrder.receta.detallesCerca.codigo ?? '-' }}</span>
-                <span>Color: {{ detailWorkOrder.receta.detallesCerca.color ?? '-' }}</span>
-                <span>Armazon: {{ detailWorkOrder.receta.detallesCerca.armazonMarca ?? '-' }}</span>
+              <span>ADD: {{ getRecetaCerca(detailWorkOrder)?.ojoDerecho?.adicion ?? '-' }}</span>
+              <span>DP: {{ getRecetaCerca(detailWorkOrder)?.distanciaPupilar ?? '-' }}</span>
+              @if (detailWorkOrder.receta?.detallesCerca) {
+                <span>Cristal: {{ detailWorkOrder.receta?.detallesCerca?.cristal ?? '-' }}</span>
+                <span>Codigo: {{ detailWorkOrder.receta?.detallesCerca?.codigo ?? '-' }}</span>
+                <span>Color: {{ detailWorkOrder.receta?.detallesCerca?.color ?? '-' }}</span>
+                <span>Armazon: {{ detailWorkOrder.receta?.detallesCerca?.armazonMarca ?? '-' }}</span>
               }
             </div>
           </div>

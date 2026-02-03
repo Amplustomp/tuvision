@@ -777,4 +777,18 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
     }
     return '-';
   }
+
+  getRecetaLejos(order: WorkOrder): Prescription | null {
+    if (order.recetaLejosId && typeof order.recetaLejosId === 'object') {
+      return order.recetaLejosId as Prescription;
+    }
+    return null;
+  }
+
+  getRecetaCerca(order: WorkOrder): Prescription | null {
+    if (order.recetaCercaId && typeof order.recetaCercaId === 'object') {
+      return order.recetaCercaId as Prescription;
+    }
+    return null;
+  }
 }
