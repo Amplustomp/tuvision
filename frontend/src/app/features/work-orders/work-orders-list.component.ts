@@ -68,11 +68,7 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
       od: { esfera: '', cilindro: '', grado: '' },
       oi: { esfera: '', cilindro: '', grado: '' },
       add: '',
-      dp: '',
-      cristal: '',
-      codigo: '',
-      color: '',
-      armazonMarca: ''
+      dp: ''
     };
 
     private subscription = new Subscription();
@@ -662,11 +658,7 @@ export class WorkOrdersListComponent implements OnInit, OnDestroy {
       od: { esfera: '', cilindro: '', grado: '' },
       oi: { esfera: '', cilindro: '', grado: '' },
       add: '',
-      dp: '',
-      cristal: '',
-      codigo: '',
-      color: '',
-      armazonMarca: ''
+      dp: ''
     };
   }
 

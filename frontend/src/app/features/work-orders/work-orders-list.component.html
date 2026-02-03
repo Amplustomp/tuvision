@@ -306,6 +306,32 @@
                   </div>
         }
 
+        @if ((formData.tipoOrden === 'armazon' || formData.tipoOrden === 'lente_completo') && formData.receta?.detallesLejos) {
+          <div class="form-section">
+            <h3>Detalles de Armazón</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="armazonMarca">Armazón/Marca</label>
+                <input type="text" id="armazonMarca" [(ngModel)]="formData.receta!.detallesLejos!.armazonMarca" placeholder="Ray-Ban" />
+              </div>
+              <div class="form-group">
+                <label for="cristal">Cristal</label>
+                <input type="text" id="cristal" [(ngModel)]="formData.receta!.detallesLejos!.cristal" placeholder="Policarbonato" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="codigo">Código</label>
+                <input type="text" id="codigo" [(ngModel)]="formData.receta!.detallesLejos!.codigo" placeholder="PC-001" />
+              </div>
+              <div class="form-group">
+                <label for="color">Color</label>
+                <input type="text" id="color" [(ngModel)]="formData.receta!.detallesLejos!.color" placeholder="Transparente" />
+              </div>
+            </div>
+          </div>
+        }
+
         <div class="form-section">
           <h3>Datos de Compra</h3>
           <div class="form-row">
@@ -632,24 +658,6 @@
             <div class="form-group">
               <label>DP {{ prescriptionFormType === 'lejos' ? 'Lejos' : 'Cerca' }}</label>
               <input type="text" [(ngModel)]="prescriptionFormData.dp" placeholder="63" />
-            </div>
-            <div class="form-group">
-              <label>Cristal</label>
-              <input type="text" [(ngModel)]="prescriptionFormData.cristal" placeholder="Policarbonato" />
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Codigo</label>
-              <input type="text" [(ngModel)]="prescriptionFormData.codigo" placeholder="PC-001" />
-            </div>
-            <div class="form-group">
-              <label>Color</label>
-              <input type="text" [(ngModel)]="prescriptionFormData.color" placeholder="Transparente" />
-            </div>
-            <div class="form-group">
-              <label>Armazon/Marca</label>
-              <input type="text" [(ngModel)]="prescriptionFormData.armazonMarca" placeholder="Ray-Ban" />
             </div>
           </div>
         }
