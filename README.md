@@ -270,9 +270,11 @@ Swagger permite:
 - Acceso directo a la última receta del cliente
 
 **Módulo de Recetas Médicas:**
-- Listado de recetas ordenado por fecha (más reciente primero)
-- Búsqueda por RUT del cliente
-- Historial de recetas por cliente
+- Vista agrupada por cliente: muestra 1 registro por cliente con sus recetas organizadas por tipo
+- Tipos de receta expandibles: secciones "Lejos" y "Cerca" con contador y opción de expandir/colapsar
+- Búsqueda por RUT o nombre del cliente
+- Filtros por rango de fechas
+- Historial completo de recetas por cliente dentro de cada sección expandible
 - Crear nuevas recetas con datos de ambos ojos (OD/OI)
 - Valores de receta soportan números negativos y decimales
 - Editar recetas (solo admin)
